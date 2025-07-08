@@ -1,8 +1,9 @@
 import os
 import sys
+import re
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QHBoxLayout, QVBoxLayout, QSizePolicy, QFileDialog,
-    QDialog, QLabel, QScrollArea, QLineEdit, QShortcut
+    QDialog, QLabel, QScrollArea, QLineEdit, QShortcut, QPushButton
 )
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QKeySequence, QPixmap, QIcon
@@ -16,6 +17,7 @@ from modules.results_box import ResultBoxWidget
 from modules.data_table import create_data_table, get_data_table, set_table_model
 from modules.status_section import StatusSection
 from modules.footer_credit import FooterCredit
+from docx.shared import Inches, Pt
 
 from functions.display_table import load_data, filter_data, get_loaded_data, valid_filter_columns
 from functions.pandas_table_model import PandasTableModel
@@ -297,6 +299,72 @@ class GpaidiaApp(QWidget):
                     label.setStyleSheet("font-size: 13px; color: #333;")
 
         search_input.textChanged.connect(highlight_search)
+
+                # Tombol Ekspor Word dan Excel
+        export_layout = QHBoxLayout()
+        export_layout.setSpacing(15)
+
+        export_word_btn = QPushButton("Export To Word")
+        export_excel_btn = QPushButton("Export To Excel")
+
+        export_word_btn.setStyleSheet("background-color: #2B579A; color: white; font-size: 22px; padding: 20px 40px; border-radius: 5px;")
+        export_excel_btn.setStyleSheet("background-color: #10793F; color: white; font-size: 22px; padding: 20px 40px; border-radius: 5px;")
+
+        export_layout.addWidget(export_word_btn)
+        export_layout.addWidget(export_excel_btn)
+        main_layout.addLayout(export_layout)
+        
+        #dengan tabel
+        def export_to_word():
+            from docx import Document
+            from docx.shared import Inches
+            from PyQt5.QtWidgets import QFileDialog
+            import re
+
+            file_path, _ = QFileDialog.getSaveFileName(dialog, "Simpan sebagai Word", "", "Word Files (*.docx)")
+            if file_path:
+                doc = Document()
+                doc.add_heading('Preview Data Pegawai', level=1)
+                
+                # Buat tabel dengan 2 kolom
+                table = doc.add_table(rows=0, cols=2)
+                table.style = 'Table Grid'  # Gaya tabel (bisa diganti jadi 'Light Grid', dsb)
+
+                for label, _, _ in col_widgets:
+                    clean_text = re.sub(r"<[^>]+>", "", label.text())  # Hapus tag HTML
+                    
+                    if ": " in clean_text:
+                        kolom, nilai = clean_text.split(": ", 1)
+                    else:
+                        kolom, nilai = clean_text, ""
+
+                    row_cells = table.add_row().cells
+                    row_cells[0].text = kolom.strip()
+                    row_cells[1].text = nilai.strip()
+
+                    # Optional: ukuran font
+                    for cell in row_cells:
+                        for paragraph in cell.paragraphs:
+                            for run in paragraph.runs:
+                                run.font.size = Pt(11)
+
+                doc.save(file_path)
+        
+        def export_to_excel():
+            from PyQt5.QtWidgets import QFileDialog
+            import pandas as pd
+
+            file_path, _ = QFileDialog.getSaveFileName(dialog, "Simpan sebagai Excel", "", "Excel Files (*.xlsx)")
+            if file_path:
+                data_dict = {}
+                for label, col_name, val in col_widgets:
+                    data_dict[col_name.title()] = [val]
+
+                df = pd.DataFrame(data_dict)
+                df.to_excel(file_path, index=False)
+
+        export_word_btn.clicked.connect(export_to_word)
+        export_excel_btn.clicked.connect(export_to_excel)
 
         dialog.setLayout(main_layout)
         dialog.exec_()
