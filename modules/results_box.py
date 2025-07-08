@@ -1,7 +1,7 @@
 import os
 import sys
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel, QWidget, QSizePolicy
-from PyQt5.QtGui import QFont, QFontDatabase
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel, QWidget, QSizePolicy, QPushButton
+from PyQt5.QtGui import QFont, QFontDatabase, QPixmap, QIcon
 from PyQt5.QtCore import Qt
 
 def load_montserrat_font():
@@ -77,6 +77,7 @@ class ResultBoxWidget(QWidget):
         box_wrapper = QWidget()
         box_wrapper.setLayout(box_layout)
         vertical_layout.addWidget(box_wrapper)
+        vertical_layout.addWidget(self.create_footer_boxes())
 
         self.setLayout(vertical_layout)
 
@@ -92,7 +93,90 @@ class ResultBoxWidget(QWidget):
             self.box_labels["Jumlah NON PNS"].setText(str((df["STATUS PEGAWAI"] == "NON PNS").sum()))
             self.box_labels["Jumlah PPPK"].setText(str((df["STATUS PEGAWAI"] == "PPPK").sum()))
         else:
-            # Jika kolom tidak tersedia, tampilkan 0 semua
-            for key in self.box_labels:
+            for key in ["Jumlah PNS", "Jumlah NON PNS", "Jumlah PPPK"]:
                 self.box_labels[key].setText("0")
 
+        # Hitung jumlah sekolah unik (case-insensitive)
+        if "NAMA SEKOLAH" in df.columns:
+            unique_school_count = df["NAMA SEKOLAH"].dropna().str.lower().str.strip().nunique()
+            self.box_labels["Jumlah Sekolah"].setText(str(unique_school_count))
+        else:
+            self.box_labels["Jumlah Sekolah"].setText("0")
+
+
+    def create_footer_boxes(self):
+        layout = QHBoxLayout()
+        layout.setSpacing(16)
+        layout.setContentsMargins(6, 0, 0, 0)
+
+        # === Kotak 1: Sekolah (konten di tengah) ===
+        school_widget = QWidget()
+        school_widget.setStyleSheet("""
+            background-color: #cce5ff;
+            border-radius: 8px;
+        """)
+        school_widget.setFixedHeight(50)
+        school_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        # Layout utama (vertikal) untuk center
+        school_layout = QVBoxLayout()
+        school_layout.setContentsMargins(10, 8, 10, 8)
+        school_layout.setSpacing(0)
+        school_layout.setAlignment(Qt.AlignCenter)  # Tengah secara vertikal & horizontal
+
+        content_widget = QWidget()
+        content_layout = QHBoxLayout()
+        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setSpacing(8)
+        content_layout.setAlignment(Qt.AlignCenter)  # Tengah secara horizontal
+
+        logo_label = QLabel()
+        logo_path = resource_path("icons/school.png")
+        logo_pixmap = QPixmap(logo_path).scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        logo_label.setPixmap(logo_pixmap)
+        logo_label.setAlignment(Qt.AlignVCenter)
+
+        label_text = QLabel("Jumlah Sekolah:")
+        label_text.setFont(QFont(self.font_family, 10, QFont.Bold))
+        label_text.setAlignment(Qt.AlignVCenter)
+
+        jumlah_label = QLabel("0")
+        jumlah_label.setFont(QFont(self.font_family, 12, QFont.Bold))
+        jumlah_label.setAlignment(Qt.AlignVCenter)
+        jumlah_label.setStyleSheet("color: #EE6820;")
+        self.box_labels["Jumlah Sekolah"] = jumlah_label
+
+        content_layout.addWidget(logo_label)
+        content_layout.addWidget(label_text)
+        content_layout.addWidget(jumlah_label)
+
+        content_widget.setLayout(content_layout)
+        school_layout.addWidget(content_widget)
+        school_widget.setLayout(school_layout)
+
+        # === Kotak 2: Tombol Resume ===
+        resume_button = QPushButton()
+        resume_button.setText(" Resume")
+        resume_button.setIcon(QIcon(resource_path("icons/resume.png")))
+        resume_button.setFont(QFont(self.font_family, 10, QFont.Bold))
+        resume_button.setCursor(Qt.PointingHandCursor)
+        resume_button.setStyleSheet("""
+            QPushButton {
+                background-color: #cce5ff;
+                color: #004085;
+                border-radius: 8px;
+                padding: 8px 16px;
+            }
+            QPushButton:hover {
+                background-color: #b8daff;
+            }
+        """)
+        resume_button.setFixedHeight(50)
+        resume_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        layout.addWidget(school_widget)
+        layout.addWidget(resume_button)
+
+        container = QWidget()
+        container.setLayout(layout)
+        return container  

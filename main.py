@@ -54,8 +54,11 @@ class GpaidiaApp(QWidget):
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
 
+        self.filter_widget = create_filter_section(available_filters={})
         self.filter_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+        self.filter_widget.setMinimumWidth(450)  # ← Tambahkan ini
         self.filter_widget.filter_changed.connect(self.apply_filter)
+
 
         self.sidebar_frame, self.sidebar_state_handler = create_sidebar(
             on_load_callback=self.handle_file_loaded,
@@ -76,8 +79,8 @@ class GpaidiaApp(QWidget):
         self.filter_result_layout.setSpacing(30)
 
         self.result_box_widget = ResultBoxWidget()
-        self.filter_result_layout.addWidget(self.filter_widget, stretch=2)
-        self.filter_result_layout.addWidget(self.result_box_widget, stretch=1)
+        self.filter_result_layout.addWidget(self.filter_widget, stretch=3, alignment=Qt.AlignTop)
+        self.filter_result_layout.addWidget(self.result_box_widget, stretch=1, alignment=Qt.AlignTop)
 
         filter_result_container = QWidget()
         filter_result_container.setLayout(self.filter_result_layout)
@@ -136,7 +139,9 @@ class GpaidiaApp(QWidget):
             self.filter_widget = create_filter_section(available_filters=valid_filter_columns)
             self.filter_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
             self.filter_widget.filter_changed.connect(self.apply_filter)
-            self.filter_result_layout.insertWidget(0, self.filter_widget, stretch=2)
+            self.filter_widget.setMinimumWidth(450)  # Tambahkan ini
+            self.filter_result_layout.insertWidget(0, self.filter_widget, stretch=3, alignment=Qt.AlignTop)
+
 
             self.reset_filters()
 
