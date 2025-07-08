@@ -30,14 +30,18 @@ class FilterWidget(QWidget):
         font_family = load_montserrat_font()
         self.setMaximumWidth(700)
         self.setStyleSheet("background-color: white;")
+
+        # Pastikan layout utama menempel ke atas
         outer_layout = QVBoxLayout(self)
         outer_layout.setContentsMargins(20, 20, 0, 0)
         outer_layout.setSpacing(10)
+        outer_layout.addStretch(0)  # Agar menempel ke atas
 
         title_label = QLabel("Filter")
         title_label.setFont(QFont(font_family, 12, QFont.Bold))
         outer_layout.addWidget(title_label)
 
+        # Layout untuk combo dan label filter
         grid = QGridLayout()
         grid.setHorizontalSpacing(20)
         grid.setVerticalSpacing(10)
