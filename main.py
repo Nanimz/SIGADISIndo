@@ -3,11 +3,12 @@ import sys
 import re
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QHBoxLayout, QVBoxLayout, QSizePolicy, QFileDialog,
-    QDialog, QLabel, QScrollArea, QLineEdit, QShortcut, QPushButton
+    QDialog, QLabel, QScrollArea, QLineEdit, QShortcut, QPushButton, QMessageBox
 )
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QKeySequence, QPixmap, QIcon
 from PyQt5.QtWidgets import QSplashScreen
+from docx.enum.text import WD_TAB_ALIGNMENT
 
 from modules.sidebar import create_sidebar
 from modules.header import create_header
@@ -354,6 +355,7 @@ class GpaidiaApp(QWidget):
                                 run.font.size = Pt(11)
 
                 doc.save(file_path)
+                QMessageBox.information(None, "Berhasil", "Data berhasil disimpan dalam format Word.")
         
         def export_to_excel():
             from PyQt5.QtWidgets import QFileDialog
@@ -367,13 +369,14 @@ class GpaidiaApp(QWidget):
 
                 df = pd.DataFrame(data_dict)
                 df.to_excel(file_path, index=False)
+                # ✅ Tambahkan ini agar popup muncul
+                QMessageBox.information(None, "Berhasil", "Data berhasil disimpan dalam format Excel.")
 
         export_word_btn.clicked.connect(export_to_word)
         export_excel_btn.clicked.connect(export_to_excel)
 
         dialog.setLayout(main_layout)
         dialog.exec_()
-
 
 def resource_path(relative_path):
     base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))

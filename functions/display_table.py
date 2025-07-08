@@ -1,4 +1,5 @@
 import pandas as pd
+from datetime import datetime
 
 loaded_df = None
 valid_filter_columns = {}
@@ -10,6 +11,8 @@ FILTER_COLUMN_MAP = {
     "Sertifikasi": "SERTIFIKASI",
     "Inpassing": "INPASSING",
     "Pensiun": "PENSIUN",
+    "Masa Kerja": "TANGGAL TMT PENDIDIK",
+    "Usia": "USIA"
 }
 
 def load_data(file_path):
@@ -45,9 +48,30 @@ def filter_data(filters):
     if df is None:
         return pd.DataFrame()
 
+    today = pd.Timestamp.today()
+
     for label, value in filters.items():
         column = valid_filter_columns.get(label)
         if column:
-            df = df[df[column] == value]
+            if label == "Usia" and "-" in value:
+                try:
+                    lower, upper = map(int, value.split("-"))
+                    df[column] = pd.to_numeric(df[column], errors='coerce')
+                    df = df[df[column].between(lower, upper, inclusive="left")]
+                except ValueError:
+                    continue
+
+            elif label == "Masa Kerja" and "-" in value:
+                try:
+                    lower, upper = map(int, value.split("-"))
+                    df[column] = pd.to_datetime(df[column], errors="coerce")
+                    df["MASA_KERJA_TAHUN"] = (today - df[column]).dt.days // 365
+                    df = df[df["MASA_KERJA_TAHUN"].between(lower, upper, inclusive="left")]
+                except Exception as e:
+                    print(f"❌ Gagal menghitung masa kerja: {e}")
+                    continue
+
+            else:
+                df = df[df[column] == value]
 
     return df

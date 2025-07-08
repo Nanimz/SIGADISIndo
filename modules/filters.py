@@ -50,8 +50,10 @@ class FilterWidget(QWidget):
             ("Jenjang Sekolah", ["Semua", "SD", "SMP", "SMA", "SMK"]),
             ("Status Pegawai", ["Semua", "PNS", "NON PNS", "PPPK"]),
             ("Jenis Kelamin", ["Semua", "L", "P"]),
+            ("Masa Kerja", ["Semua"] + [f"{i}-{i+5}" for i in range(0, 50, 5)]),
             ("Sertifikasi", ["Semua", "Sudah", "Belum"]),
             ("Inpassing", ["Semua", "Sudah", "Belum"]),
+            ("Usia", ["Semua", "25-30", "30-35", "35-40", "40-45", "45-50", "55-60"]),
             ("Pensiun", ["Semua", "Sudah", "Belum"]),
         ]
 
@@ -86,8 +88,8 @@ class FilterWidget(QWidget):
             self.filter_combos[label_text] = combo
             combo.currentTextChanged.connect(self.on_filter_changed)
 
-            row = count % 3
-            col = (count // 3) * 2
+            row = count % 4  # Ubah menjadi 4 baris
+            col = (count // 4) * 2
             grid.addWidget(label, row, col)
             grid.addWidget(combo, row, col + 1)
             count += 1
