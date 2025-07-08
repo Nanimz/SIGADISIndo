@@ -1,0 +1,328 @@
+import os
+import sys
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QHBoxLayout, QVBoxLayout, QSizePolicy, QFileDialog,
+    QDialog, QLabel, QScrollArea, QLineEdit, QShortcut
+)
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QKeySequence, QPixmap, QIcon
+from PyQt5.QtWidgets import QSplashScreen
+
+from modules.sidebar import create_sidebar
+from modules.header import create_header
+from modules.filters import create_filter_section
+from modules.searchbar import create_search_bar
+from modules.results_box import ResultBoxWidget
+from modules.data_table import create_data_table, get_data_table, set_table_model
+from modules.status_section import StatusSection
+from modules.footer_credit import FooterCredit
+
+from functions.display_table import load_data, filter_data, get_loaded_data, valid_filter_columns
+from functions.pandas_table_model import PandasTableModel
+from functions.filter_workers import FilterWorker
+
+
+class GpaidiaApp(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Aplikasi Manajemen Gpaidia")
+        self.setWindowIcon(QIcon(resource_path("icons/splash.png")))
+        self.setGeometry(100, 100, 1000, 600)
+        self.is_sidebar_mini = False
+        self.result_box_widget = None
+        self.search_input = None
+        self.filtered_data = None
+        self.worker_thread = None
+        self.status_section = None
+        self.selection_connected = False
+
+        # 🛡️ Buat filter kosong dulu untuk mencegah AttributeError
+        self.filter_widget = create_filter_section(available_filters={})
+
+        self.search_timer = QTimer()
+        self.search_timer.setSingleShot(True)
+        self.search_timer.timeout.connect(self.apply_search_filter)
+
+        self.setup_ui()
+        self.setStyleSheet("background-color: white;")
+
+    def setup_ui(self):
+        self.main_layout = QHBoxLayout(self)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
+
+        self.filter_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+        self.filter_widget.filter_changed.connect(self.apply_filter)
+
+        self.sidebar_frame, self.sidebar_state_handler = create_sidebar(
+            on_load_callback=self.handle_file_loaded,
+            filter_widget=self.filter_widget,
+            on_reset_callback=self.reset_filters
+        )
+        self.main_layout.addWidget(self.sidebar_frame)
+
+        self.content_layout = QVBoxLayout()
+        self.content_layout.setContentsMargins(0, 0, 0, 0)
+        self.content_layout.setSpacing(0)
+
+        header_widget = create_header(toggle_callback=self.toggle_sidebar)
+        self.content_layout.addWidget(header_widget)
+
+        self.filter_result_layout = QHBoxLayout()
+        self.filter_result_layout.setContentsMargins(20, 10, 20, 10)
+        self.filter_result_layout.setSpacing(30)
+
+        self.result_box_widget = ResultBoxWidget()
+        self.filter_result_layout.addWidget(self.filter_widget, stretch=2)
+        self.filter_result_layout.addWidget(self.result_box_widget, stretch=1)
+
+        filter_result_container = QWidget()
+        filter_result_container.setLayout(self.filter_result_layout)
+        filter_result_container.setStyleSheet("background-color: white;")
+        self.content_layout.addWidget(filter_result_container)
+
+        search_widget, self.search_input = create_search_bar(self.search_data)
+        self.content_layout.addWidget(search_widget)
+
+        table_container = create_data_table()
+        table_view = get_data_table()
+        table_view.doubleClicked.connect(self.show_row_preview)
+
+        table_and_status_wrapper = QWidget()
+        table_and_status_layout = QVBoxLayout()
+        table_and_status_layout.setContentsMargins(0, 0, 0, 5)
+        table_and_status_layout.setSpacing(5)
+
+        table_and_status_layout.addWidget(table_container)
+
+        self.status_section = StatusSection()
+        table_and_status_layout.addWidget(self.status_section)
+
+        table_and_status_wrapper.setLayout(table_and_status_layout)
+        self.content_layout.addWidget(table_and_status_wrapper)
+
+        self.content_layout.addWidget(FooterCredit())
+
+        if table_view.selectionModel():
+            table_view.selectionModel().selectionChanged.connect(self.on_selection_changed)
+
+        content_widget = QWidget()
+        content_widget.setLayout(self.content_layout)
+        content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.main_layout.addWidget(content_widget)
+
+        shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
+        shortcut.activated.connect(lambda: get_data_table().clearSelection())
+
+    def toggle_sidebar(self):
+        self.is_sidebar_mini = not self.is_sidebar_mini
+        self.sidebar_state_handler(self.is_sidebar_mini)
+
+    def handle_file_loaded(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Pilih File Data", "", "Excel Files (*.xlsx *.xls);;CSV Files (*.csv)"
+        )
+        if path:
+            load_data(path)
+
+            # Hapus filter widget lama dari layout
+            self.filter_result_layout.removeWidget(self.filter_widget)
+            self.filter_widget.setParent(None)
+
+            # Ganti dengan filter baru sesuai kolom yang tersedia
+            self.filter_widget = create_filter_section(available_filters=valid_filter_columns)
+            self.filter_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+            self.filter_widget.filter_changed.connect(self.apply_filter)
+            self.filter_result_layout.insertWidget(0, self.filter_widget, stretch=2)
+
+            self.reset_filters()
+
+    def reset_filters(self):
+        if self.filter_widget:
+            self.filter_widget.reset_filters()
+
+        if self.search_input:
+            self.search_input.setText("")
+
+        get_data_table().clearSelection()
+
+        if self.status_section:
+            self.status_section.update_selected_row(None)
+
+        df = get_loaded_data()
+        self.filtered_data = df
+        self.apply_search_filter()
+
+    def apply_filter(self, filters):
+        df = filter_data(filters)
+        self.filtered_data = df
+        self.apply_search_filter()
+
+    def apply_search_filter(self):
+        df = self.filtered_data if self.filtered_data is not None else get_loaded_data()
+        if df is None:
+            return
+
+        query = self.search_input.text().strip().lower() if self.search_input else ""
+
+        if self.worker_thread:
+            self.worker_thread.quit()
+            self.worker_thread.wait()
+
+        self.worker_thread = FilterWorker(df, query)
+        self.worker_thread.result_ready.connect(self.on_filter_result)
+        self.worker_thread.start()
+
+    def on_filter_result(self, result_df):
+        model = PandasTableModel(result_df)
+        set_table_model(model)
+
+        if self.result_box_widget:
+            self.result_box_widget.update_counts(result_df)
+
+        if self.status_section:
+            self.status_section.update_total(len(result_df))
+
+        table_view = get_data_table()
+        sel_model = table_view.selectionModel()
+
+        try:
+            sel_model.selectionChanged.disconnect(self.on_selection_changed)
+        except (TypeError, RuntimeError):
+            pass
+
+        sel_model.selectionChanged.connect(self.on_selection_changed)
+
+    def on_selection_changed(self):
+        table_view = get_data_table()
+        sel_model = table_view.selectionModel()
+        selected_rows = list(set(index.row() for index in sel_model.selectedIndexes()))
+
+        if selected_rows:
+            row_index = selected_rows[0]
+            if self.status_section:
+                self.status_section.update_selected_row(row_index)
+        else:
+            if self.status_section:
+                self.status_section.update_selected_row(None)
+
+    def search_data(self, text):
+        self.search_timer.start(300)
+
+    def show_row_preview(self, index):
+        table_view = get_data_table()
+        model = index.model()
+
+        visible_columns = [
+            col for col in range(model.columnCount())
+            if not table_view.isColumnHidden(col)
+        ]
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Preview Detail")
+        dialog.setMinimumSize(1100, 800)
+        dialog.setStyleSheet("background-color: white;")
+
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setSpacing(20)
+
+        title = QLabel("Preview")
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet("font-size: 20px; font-weight: bold; color: #212121;")
+        main_layout.addWidget(title)
+
+        search_input = QLineEdit()
+        search_input.setPlaceholderText("Cari kolom atau isi...")
+        search_input.setStyleSheet("""
+            QLineEdit {
+                padding: 8px;
+                font-size: 14px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+            }
+        """)
+        main_layout.addWidget(search_input)
+
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+
+        scroll_widget = QWidget()
+        scroll_layout = QHBoxLayout(scroll_widget)
+        scroll_layout.setSpacing(30)
+
+        col1, col2, col3, col4 = QVBoxLayout(), QVBoxLayout(), QVBoxLayout(), QVBoxLayout()
+        col_widgets = []
+
+        part = (len(visible_columns) + 3) // 4
+
+        for idx, col in enumerate(visible_columns):
+            col_name = model.headerData(col, Qt.Horizontal)
+            value = model.data(model.index(index.row(), col), Qt.DisplayRole)
+
+            label = QLabel(f"<b>{col_name}</b>: {value}")
+            label.setWordWrap(True)
+            label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            label.setStyleSheet("font-size: 13px; color: #333;")
+            col_widgets.append((label, col_name.lower(), str(value).lower()))
+
+            if idx < part:
+                col1.addWidget(label)
+            elif idx < 2 * part:
+                col2.addWidget(label)
+            elif idx < 3 * part:
+                col3.addWidget(label)
+            else:
+                col4.addWidget(label)
+
+        scroll_layout.addLayout(col1)
+        scroll_layout.addLayout(col2)
+        scroll_layout.addLayout(col3)
+        scroll_layout.addLayout(col4)
+
+        scroll_area.setWidget(scroll_widget)
+        main_layout.addWidget(scroll_area)
+
+        def highlight_search():
+            query = search_input.text().lower().strip()
+            found = False
+            for label, col_name, val in col_widgets:
+                combined = f"{col_name} {val}"
+                if query and query in combined:
+                    label.setStyleSheet("font-size: 13px; color: black; background-color: #C1A910; padding: 2px;")
+                    if not found:
+                        scroll_area.ensureWidgetVisible(label)
+                        found = True
+                else:
+                    label.setStyleSheet("font-size: 13px; color: #333;")
+
+        search_input.textChanged.connect(highlight_search)
+
+        dialog.setLayout(main_layout)
+        dialog.exec_()
+
+
+def resource_path(relative_path):
+    base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))
+    return os.path.join(base_path, relative_path)
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+
+    splash_path = resource_path("icons/splash.png")
+    splash_pix = QPixmap(splash_path)
+
+    splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
+    splash.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+    splash.show()
+
+    window = GpaidiaApp()
+
+    def start_app():
+        splash.finish(window)
+        window.show()
+
+    QTimer.singleShot(1, start_app)
+
+    sys.exit(app.exec_())
