@@ -64,11 +64,9 @@ def filter_data(filters):
             elif label == "Masa Kerja" and "-" in value:
                 try:
                     lower, upper = map(int, value.split("-"))
-                    # Konversi kolom TMT ke datetime dan drop error
-                    tmt_dates = pd.to_datetime(df[column], errors="coerce")
-                    masa_kerja_tahun = ((today - tmt_dates).dt.days // 365)
-                    mask = masa_kerja_tahun.between(lower, upper, inclusive="left")
-                    df = df[mask]
+                    df[column] = pd.to_datetime(df[column], errors="coerce")
+                    df["MASA_KERJA_TAHUN"] = (today - df[column]).dt.days // 365
+                    df = df[df["MASA_KERJA_TAHUN"].between(lower, upper, inclusive="left")]
                 except Exception as e:
                     print(f"❌ Gagal menghitung masa kerja: {e}")
                     continue
