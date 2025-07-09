@@ -13,7 +13,6 @@ def load_montserrat_font():
     return QFontDatabase.applicationFontFamilies(font_id)[0]
 
 def resource_path(relative_path):
-    """Dapatkan path absolut, baik saat run .py atau .exe"""
     base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))
     return os.path.join(base_path, relative_path)
 
@@ -23,7 +22,7 @@ class ResultBoxWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.font_family = load_montserrat_font()
-        self.box_labels = {}  # Untuk menyimpan referensi label nilai
+        self.box_labels = {}
         self.init_ui()
 
     def init_ui(self):
@@ -59,7 +58,6 @@ class ResultBoxWidget(QWidget):
             value.setAlignment(Qt.AlignCenter)
             value.setStyleSheet("color: #EE6820;")
 
-            # Simpan referensinya
             self.box_labels[label] = value
 
             inner_layout.addWidget(title)
@@ -84,34 +82,33 @@ class ResultBoxWidget(QWidget):
         self.setLayout(vertical_layout)
 
     def update_counts(self, df):
-        """Update jumlah berdasarkan DataFrame hasil filter"""
         if df is None or df.empty:
             for key in self.box_labels:
                 self.box_labels[key].setText("0")
             return
 
-        if "STATUS PEGAWAI" in df.columns:
-            self.box_labels["Jumlah PNS"].setText(str((df["STATUS PEGAWAI"] == "PNS").sum()))
-            self.box_labels["Jumlah NON PNS"].setText(str((df["STATUS PEGAWAI"] == "NON PNS").sum()))
-            self.box_labels["Jumlah PPPK"].setText(str((df["STATUS PEGAWAI"] == "PPPK").sum()))
+        df.columns = df.columns.str.lower()
+
+        if "status pegawai" in df.columns:
+            status_series = df["status pegawai"].dropna().str.lower().str.strip()
+            self.box_labels["Jumlah PNS"].setText(str((status_series == "pns").sum()))
+            self.box_labels["Jumlah NON PNS"].setText(str((status_series == "non pns").sum()))
+            self.box_labels["Jumlah PPPK"].setText(str((status_series == "pppk").sum()))
         else:
             for key in ["Jumlah PNS", "Jumlah NON PNS", "Jumlah PPPK"]:
                 self.box_labels[key].setText("0")
 
-        # Hitung jumlah sekolah unik (case-insensitive)
-        if "NAMA SEKOLAH" in df.columns:
-            unique_school_count = df["NAMA SEKOLAH"].dropna().str.lower().str.strip().nunique()
+        if "nama sekolah" in df.columns:
+            unique_school_count = df["nama sekolah"].dropna().str.lower().str.strip().nunique()
             self.box_labels["Jumlah Sekolah"].setText(str(unique_school_count))
         else:
             self.box_labels["Jumlah Sekolah"].setText("0")
-
 
     def create_footer_boxes(self):
         layout = QHBoxLayout()
         layout.setSpacing(16)
         layout.setContentsMargins(6, 0, 0, 0)
 
-        # === Kotak 1: Sekolah (konten di tengah) ===
         school_widget = QWidget()
         school_widget.setStyleSheet("""
             background-color: #cce5ff;
@@ -120,17 +117,16 @@ class ResultBoxWidget(QWidget):
         school_widget.setFixedHeight(50)
         school_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        # Layout utama (vertikal) untuk center
         school_layout = QVBoxLayout()
         school_layout.setContentsMargins(10, 8, 10, 8)
         school_layout.setSpacing(0)
-        school_layout.setAlignment(Qt.AlignCenter)  # Tengah secara vertikal & horizontal
+        school_layout.setAlignment(Qt.AlignCenter)
 
         content_widget = QWidget()
         content_layout = QHBoxLayout()
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(8)
-        content_layout.setAlignment(Qt.AlignCenter)  # Tengah secara horizontal
+        content_layout.setAlignment(Qt.AlignCenter)
 
         logo_label = QLabel()
         logo_path = resource_path("icons/school.png")
@@ -156,7 +152,6 @@ class ResultBoxWidget(QWidget):
         school_layout.addWidget(content_widget)
         school_widget.setLayout(school_layout)
 
-        # === Kotak 2: Tombol Resume ===
         resume_button = QPushButton()
         resume_button.setText(" Resume")
         resume_button.setIcon(QIcon(resource_path("icons/resume.png")))
@@ -177,10 +172,9 @@ class ResultBoxWidget(QWidget):
         resume_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         resume_button.clicked.connect(self.resume_clicked.emit)
 
-
         layout.addWidget(school_widget)
         layout.addWidget(resume_button)
 
         container = QWidget()
         container.setLayout(layout)
-        return container  
+        return container

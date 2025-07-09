@@ -30,14 +30,20 @@ def load_data(file_path):
         return
 
     if loaded_df is not None:
+        # 🧼 Bersihkan nilai
         loaded_df.fillna("nan", inplace=True)
         cols_to_clean = ["NUPTK", "NRG", "NIP", "NIK", "NO SK DIRJEN"]
         for col in cols_to_clean:
             if col in loaded_df.columns:
-                loaded_df[col] = loaded_df[col].astype(str).str.replace(r'\.0$', '', regex=True)
+                loaded_df[col] = loaded_df[col].astype(str).str.replace(r'\\.0$', '', regex=True)
 
-        # Hanya simpan filter yang kolomnya ada di data
-        valid_filter_columns = {label: col for label, col in FILTER_COLUMN_MAP.items() if col in loaded_df.columns}
+        # 🔁 Normalisasi kolom ke lowercase untuk pemrosesan
+        lower_columns = [col.lower() for col in loaded_df.columns]
+        loaded_df.columns = lower_columns
+
+        # 🧠 Petakan filter hanya yang tersedia (pakai lowercase)
+        valid_filter_columns = {label: col.lower() for label, col in FILTER_COLUMN_MAP.items() if col.lower() in loaded_df.columns}
+
 
 def get_loaded_data():
     global loaded_df
@@ -73,5 +79,4 @@ def filter_data(filters):
 
             else:
                 df = df[df[column] == value]
-
     return df
