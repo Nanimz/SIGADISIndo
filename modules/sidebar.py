@@ -2,7 +2,7 @@ import os
 import sys
 from PyQt5.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFrame, QWidget,
-    QDialog, QCheckBox, QScrollArea, QDialogButtonBox
+    QDialog, QCheckBox, QScrollArea, QDialogButtonBox, QMessageBox
 )
 from PyQt5.QtGui import QPixmap, QFont, QIcon, QFontDatabase
 from PyQt5.QtCore import Qt, QSize
@@ -79,6 +79,8 @@ def show_columns_dialog():
     dialog.exec_()
 
 
+# Perbaikan untuk sidebar.py
+
 def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=None):
     font_family = load_montserrat_font()
     sidebar = QVBoxLayout()
@@ -86,6 +88,7 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
     sidebar.setSpacing(10)
     sidebar.setAlignment(Qt.AlignTop)
 
+    # Header container tetap sama
     header_container = QWidget()
     header_container.setFixedHeight(112)
     header_layout = QHBoxLayout()
@@ -150,7 +153,7 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
         button_widgets.append(btn)
         return btn
 
-
+    # Tambahkan tombol-tombol atas
     for name, icon in buttons_top:
         btn = create_button(name, icon)
         if name == "Load File" and on_load_callback:
@@ -161,25 +164,45 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
             btn.clicked.connect(show_columns_dialog)
         elif name == "Save to Excel":
             from functions.export_excel import export_current_table_to_excel
-            btn.clicked.connect(export_current_table_to_excel)
+            def handle_export():
+                success, message = export_current_table_to_excel()
+                msg = QMessageBox()
+                msg.setWindowTitle("Export Excel")
+                msg.setText(message)
+                msg.setIcon(QMessageBox.Information if success else QMessageBox.Critical)
+                msg.exec_()
+
+            btn.clicked.connect(handle_export)
         sidebar.addWidget(btn)
 
-    sidebar.addStretch(1)
-
+    # PERBAIKAN: Buat container khusus untuk tombol-tombol bawah
+    bottom_buttons_container = QWidget()
+    bottom_buttons_layout = QVBoxLayout()
+    bottom_buttons_layout.setContentsMargins(0, 0, 0, 0)
+    bottom_buttons_layout.setSpacing(10)
+    
     buttons_bottom = [
         ("Tutorial", "icons/tutorial.png"),
         ("Deskripsi", "icons/deskripsi.png"),
     ]
+    
+    bottom_button_widgets = []
     for name, icon in buttons_bottom:
         btn = create_button(name, icon)
-
-        # ✅ Tambahkan aksi jika tombol tutorial ditekan
+        bottom_button_widgets.append(btn)
+        
         if name == "Tutorial":
             btn.clicked.connect(show_tutorial_dialog)
         elif name == "Deskripsi":
             btn.clicked.connect(show_deskripsi_dialog)
-
-        sidebar.addWidget(btn)
+        
+        bottom_buttons_layout.addWidget(btn)
+    
+    bottom_buttons_container.setLayout(bottom_buttons_layout)
+    
+    # Tambahkan stretch yang lebih controlled
+    sidebar.addStretch(1)
+    sidebar.addWidget(bottom_buttons_container)
 
     frame = QFrame()
     default_width = 320
@@ -192,7 +215,9 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
     def toggle_sidebar(mini: bool):
         if mini:
             frame.setFixedWidth(mini_width)
-            for btn in button_widgets:
+            # Update semua tombol (termasuk tombol bawah)
+            all_buttons = button_widgets + bottom_button_widgets
+            for btn in all_buttons:
                 btn.setText("")
                 btn.setStyleSheet("""
                     QPushButton {
@@ -210,7 +235,9 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
             text_label.setVisible(False)
         else:
             frame.setFixedWidth(default_width)
-            for btn in button_widgets:
+            # Update semua tombol (termasuk tombol bawah)
+            all_buttons = button_widgets + bottom_button_widgets
+            for btn in all_buttons:
                 btn.setText(f"   {btn.objectName()}")
                 btn.setStyleSheet("""
                     QPushButton {

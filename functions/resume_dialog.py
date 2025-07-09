@@ -6,7 +6,7 @@ from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 class ResumeDialog(QDialog):
-    def __init__(self, font_family, filters, counts, parent=None):
+    def __init__(self, font_family, filters, counts, search_text="", parent=None):
         super().__init__(parent)
         self.setWindowTitle("Ringkasan Data")
         self.setMinimumWidth(400)
@@ -24,6 +24,13 @@ class ResumeDialog(QDialog):
         layout.addSpacing(10)
 
         self.summary_texts = []
+
+        if search_text:
+            lbl_search = QLabel(f"🔍 Pencarian Teks: {search_text}")
+            lbl_search.setFont(QFont(font_family, 10, QFont.Bold))
+            layout.addWidget(lbl_search)
+            self.summary_texts.append(f"🔍 Pencarian Teks: {search_text}")
+            layout.addSpacing(10)
 
         if filters:
             filter_title = QLabel("📌 Filter Aktif:")

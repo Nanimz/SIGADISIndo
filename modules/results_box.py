@@ -111,7 +111,7 @@ class ResultBoxWidget(QWidget):
 
         school_widget = QWidget()
         school_widget.setStyleSheet("""
-            background-color: #cce5ff;
+            background-color: #d4edda;
             border-radius: 8px;
         """)
         school_widget.setFixedHeight(50)

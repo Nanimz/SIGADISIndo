@@ -13,11 +13,13 @@ class NoFocusRectStyle(QProxyStyle):
 
 _data_table_instance = None  # singleton instance
 
+# Perbaikan untuk data_table.py
+
 def create_data_table():
     global _data_table_instance
 
     table_view = QTableView()
-    table_view.setStyle(NoFocusRectStyle())  # 🔥 Hilangkan kotak fokus
+    table_view.setStyle(NoFocusRectStyle())
 
     table_view.setAlternatingRowColors(True)
     table_view.setSelectionBehavior(QTableView.SelectRows)
@@ -25,12 +27,18 @@ def create_data_table():
     table_view.horizontalHeader().setStretchLastSection(False)
     table_view.setSortingEnabled(True)
     table_view.verticalHeader().setVisible(False)
-    table_view.setFixedHeight(500)
+    
+    # PERBAIKAN: Gunakan setMinimumHeight dan setMaximumHeight untuk kontrol yang lebih baik
+    table_view.setMinimumHeight(502)
+    table_view.setMaximumHeight(502)
+    # Hapus setFixedHeight(500) yang sebelumnya
+    
     table_view.setWordWrap(False)
 
-    table_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+    # PERBAIKAN: Gunakan kebijakan size yang lebih fleksibel
+    table_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
-    # ✅ StyleSheet lengkap: warna, hover, seleksi, scrollbar
+    # StyleSheet tetap sama
     table_view.setStyleSheet("""
         QTableView {
             background-color: #ffffff;
@@ -103,8 +111,15 @@ def create_data_table():
     layout = QVBoxLayout()
     layout.setContentsMargins(40, 18, 40, 18)
     layout.addWidget(table_view)
-    layout.addStretch()
+    
+    # PERBAIKAN: Hapus atau kurangi stretch di sini
+    # layout.addStretch()  # Hapus atau ganti dengan spacing yang lebih kecil
+    layout.addSpacing(10)  # Tambahkan spacing kecil saja
+    
     container.setLayout(layout)
+    
+    # PERBAIKAN: Set size policy untuk container
+    container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
     _data_table_instance = table_view
     return container
