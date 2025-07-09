@@ -23,6 +23,7 @@ from docx.shared import Inches, Pt
 from functions.display_table import load_data, filter_data, get_loaded_data, valid_filter_columns
 from functions.pandas_table_model import PandasTableModel
 from functions.filter_workers import FilterWorker
+from functions.resume_dialog import ResumeDialog
 
 
 class GpaidiaApp(QWidget):
@@ -37,9 +38,7 @@ class GpaidiaApp(QWidget):
         self.filtered_data = None
         self.worker_thread = None
         self.status_section = None
-        self.selection_connected = False
 
-        # 🛡️ Buat filter kosong dulu untuk mencegah AttributeError
         self.filter_widget = create_filter_section(available_filters={})
 
         self.search_timer = QTimer()
@@ -56,9 +55,8 @@ class GpaidiaApp(QWidget):
 
         self.filter_widget = create_filter_section(available_filters={})
         self.filter_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-        self.filter_widget.setMinimumWidth(450)  # ← Tambahkan ini
+        self.filter_widget.setMinimumWidth(450)
         self.filter_widget.filter_changed.connect(self.apply_filter)
-
 
         self.sidebar_frame, self.sidebar_state_handler = create_sidebar(
             on_load_callback=self.handle_file_loaded,
@@ -79,6 +77,8 @@ class GpaidiaApp(QWidget):
         self.filter_result_layout.setSpacing(30)
 
         self.result_box_widget = ResultBoxWidget()
+        self.result_box_widget.resume_clicked.connect(self.show_resume_dialog)
+
         self.filter_result_layout.addWidget(self.filter_widget, stretch=3, alignment=Qt.AlignTop)
         self.filter_result_layout.addWidget(self.result_box_widget, stretch=1, alignment=Qt.AlignTop)
 
@@ -120,6 +120,24 @@ class GpaidiaApp(QWidget):
         shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
         shortcut.activated.connect(lambda: get_data_table().clearSelection())
 
+    def show_resume_dialog(self):
+        try:
+            # Ambil filter aktif dari FilterWidget
+            filters = self.filter_widget.get_current_filters()
+            
+            # Ambil nilai-nilai box hasil
+            counts = {
+                label: self.result_box_widget.box_labels[label].text()
+                for label in ["Jumlah PNS", "Jumlah NON PNS", "Jumlah PPPK", "Jumlah Sekolah"]
+            }
+
+            dialog = ResumeDialog(self.result_box_widget.font_family, filters, counts, self)
+            dialog.exec_()
+        except Exception as e:
+            print(f"❌ Gagal tampilkan resume popup: {e}")
+
+
+    # Selanjutnya tetap sama
     def toggle_sidebar(self):
         self.is_sidebar_mini = not self.is_sidebar_mini
         self.sidebar_state_handler(self.is_sidebar_mini)
@@ -130,18 +148,14 @@ class GpaidiaApp(QWidget):
         )
         if path:
             load_data(path)
-
-            # Hapus filter widget lama dari layout
             self.filter_result_layout.removeWidget(self.filter_widget)
             self.filter_widget.setParent(None)
 
-            # Ganti dengan filter baru sesuai kolom yang tersedia
             self.filter_widget = create_filter_section(available_filters=valid_filter_columns)
             self.filter_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
             self.filter_widget.filter_changed.connect(self.apply_filter)
-            self.filter_widget.setMinimumWidth(450)  # Tambahkan ini
+            self.filter_widget.setMinimumWidth(450)
             self.filter_result_layout.insertWidget(0, self.filter_widget, stretch=3, alignment=Qt.AlignTop)
-
 
             self.reset_filters()
 
@@ -306,7 +320,6 @@ class GpaidiaApp(QWidget):
 
         search_input.textChanged.connect(highlight_search)
 
-                # Tombol Ekspor Word dan Excel
         export_layout = QHBoxLayout()
         export_layout.setSpacing(15)
 
@@ -319,57 +332,36 @@ class GpaidiaApp(QWidget):
         export_layout.addWidget(export_word_btn)
         export_layout.addWidget(export_excel_btn)
         main_layout.addLayout(export_layout)
-        
-        #dengan tabel
+
         def export_to_word():
             from docx import Document
-            from docx.shared import Inches
-            from PyQt5.QtWidgets import QFileDialog
-            import re
-
             file_path, _ = QFileDialog.getSaveFileName(dialog, "Simpan sebagai Word", "", "Word Files (*.docx)")
             if file_path:
                 doc = Document()
                 doc.add_heading('Preview Data Pegawai', level=1)
-                
-                # Buat tabel dengan 2 kolom
                 table = doc.add_table(rows=0, cols=2)
-                table.style = 'Table Grid'  # Gaya tabel (bisa diganti jadi 'Light Grid', dsb)
+                table.style = 'Table Grid'
 
                 for label, _, _ in col_widgets:
-                    clean_text = re.sub(r"<[^>]+>", "", label.text())  # Hapus tag HTML
-                    
-                    if ": " in clean_text:
-                        kolom, nilai = clean_text.split(": ", 1)
-                    else:
-                        kolom, nilai = clean_text, ""
-
+                    clean_text = re.sub(r"<[^>]+>", "", label.text())
+                    kolom, nilai = clean_text.split(": ", 1) if ": " in clean_text else (clean_text, "")
                     row_cells = table.add_row().cells
                     row_cells[0].text = kolom.strip()
                     row_cells[1].text = nilai.strip()
-
-                    # Optional: ukuran font
                     for cell in row_cells:
                         for paragraph in cell.paragraphs:
                             for run in paragraph.runs:
                                 run.font.size = Pt(11)
-
                 doc.save(file_path)
                 QMessageBox.information(None, "Berhasil", "Data berhasil disimpan dalam format Word.")
-        
-        def export_to_excel():
-            from PyQt5.QtWidgets import QFileDialog
-            import pandas as pd
 
+        def export_to_excel():
+            import pandas as pd
             file_path, _ = QFileDialog.getSaveFileName(dialog, "Simpan sebagai Excel", "", "Excel Files (*.xlsx)")
             if file_path:
-                data_dict = {}
-                for label, col_name, val in col_widgets:
-                    data_dict[col_name.title()] = [val]
-
+                data_dict = {col_name.title(): [val] for _, col_name, val in col_widgets}
                 df = pd.DataFrame(data_dict)
                 df.to_excel(file_path, index=False)
-                # ✅ Tambahkan ini agar popup muncul
                 QMessageBox.information(None, "Berhasil", "Data berhasil disimpan dalam format Excel.")
 
         export_word_btn.clicked.connect(export_to_word)
@@ -385,10 +377,8 @@ def resource_path(relative_path):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-
     splash_path = resource_path("icons/splash.png")
     splash_pix = QPixmap(splash_path)
-
     splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
     splash.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
     splash.show()
@@ -400,5 +390,4 @@ if __name__ == "__main__":
         window.show()
 
     QTimer.singleShot(1, start_app)
-
     sys.exit(app.exec_())

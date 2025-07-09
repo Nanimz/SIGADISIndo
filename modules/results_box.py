@@ -2,7 +2,7 @@ import os
 import sys
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QLabel, QWidget, QSizePolicy, QPushButton
 from PyQt5.QtGui import QFont, QFontDatabase, QPixmap, QIcon
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 
 def load_montserrat_font():
     font_path = resource_path(os.path.join("assets", "montserrat", "static", "Montserrat-Bold.ttf"))
@@ -18,6 +18,8 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 class ResultBoxWidget(QWidget):
+    resume_clicked = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.font_family = load_montserrat_font()
@@ -41,7 +43,7 @@ class ResultBoxWidget(QWidget):
                 border-radius: 8px;
                 padding: 0px;
             """)
-            box_container.setFixedHeight(110)
+            box_container.setFixedHeight(95)
             box_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
             inner_layout = QVBoxLayout()
@@ -173,6 +175,8 @@ class ResultBoxWidget(QWidget):
         """)
         resume_button.setFixedHeight(50)
         resume_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        resume_button.clicked.connect(self.resume_clicked.emit)
+
 
         layout.addWidget(school_widget)
         layout.addWidget(resume_button)
