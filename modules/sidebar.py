@@ -101,7 +101,7 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
     logo_label.setAlignment(Qt.AlignVCenter)
 
     text_label = QLabel("Kementerian<br>Agama <b style='color:#C1A910;'>Kota</b><br><b style='color:#C1A910;'>Malang</b>")
-    text_label.setFont(QFont(font_family, 16, QFont.Bold))
+    text_label.setFont(QFont(font_family, 15, QFont.Bold))
     text_label.setStyleSheet("color: white;")
     text_label.setTextFormat(Qt.RichText)
     text_label.setWordWrap(True)
