@@ -12,7 +12,7 @@ FILTER_COLUMN_MAP = {
     "Inpassing": "INPASSING",
     "Pensiun": "PENSIUN",
     "Masa Kerja": "TANGGAL TMT PENDIDIK",
-    "Usia": "USIA"
+    "Usia": "TANGGAL LAHIR",
 }
 
 def load_data(file_path):
@@ -62,21 +62,38 @@ def filter_data(filters):
             if label == "Usia" and "-" in value:
                 try:
                     lower, upper = map(int, value.split("-"))
-                    df[column] = pd.to_numeric(df[column], errors='coerce')
-                    df = df[df[column].between(lower, upper, inclusive="left")]
-                except ValueError:
+                    df[column] = pd.to_datetime(df[column], errors="coerce")
+                    df["USIA_TAHUN"] = (today - df[column]).dt.days // 365
+                    df = df[df["USIA_TAHUN"].between(lower, upper, inclusive="left")]
+                except Exception as e:
+                    print(f"❌ Gagal menghitung usia: {e}")
                     continue
 
             elif label == "Masa Kerja" and "-" in value:
                 try:
                     lower, upper = map(int, value.split("-"))
                     df[column] = pd.to_datetime(df[column], errors="coerce")
-                    df["MASA_KERJA_TAHUN"] = (today - df[column]).dt.days // 365
+                    masa_kerja_series = ((today - df[column]).dt.days // 365).fillna(0).astype(int)
+                    df["MASA_KERJA_TAHUN"] = masa_kerja_series
                     df = df[df["MASA_KERJA_TAHUN"].between(lower, upper, inclusive="left")]
                 except Exception as e:
                     print(f"❌ Gagal menghitung masa kerja: {e}")
                     continue
 
+            elif label in ["Sertifikasi", "Inpassing", "Pensiun"]:
+                def normalize_cert(val):
+                    val = str(val).strip().lower()
+                    if val in ["sudah", "y", "ya", "yes", "s"]:
+                        return "Sudah"
+                    elif val in ["belum", "n", "no", "nan", "", "tidak"]:
+                        return "Belum"
+                    return val.capitalize()
+
+                df[column] = df[column].apply(normalize_cert)
+                df = df[df[column] == value]
+
             else:
                 df = df[df[column] == value]
+
     return df
+

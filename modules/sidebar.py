@@ -2,7 +2,7 @@ import os
 import sys
 from PyQt5.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFrame, QWidget,
-    QDialog, QCheckBox, QScrollArea, QDialogButtonBox, QMessageBox
+    QDialog, QCheckBox, QScrollArea, QDialogButtonBox, QMessageBox, QSizePolicy
 )
 from PyQt5.QtGui import QPixmap, QFont, QIcon, QFontDatabase
 from PyQt5.QtCore import Qt, QSize
@@ -79,8 +79,6 @@ def show_columns_dialog():
     dialog.exec_()
 
 
-# Perbaikan untuk sidebar.py
-
 def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=None):
     font_family = load_montserrat_font()
     sidebar = QVBoxLayout()
@@ -88,7 +86,7 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
     sidebar.setSpacing(10)
     sidebar.setAlignment(Qt.AlignTop)
 
-    # Header container tetap sama
+    # Header container tetap sama seperti sebelumnya
     header_container = QWidget()
     header_container.setFixedHeight(112)
     header_layout = QHBoxLayout()
@@ -96,16 +94,50 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
     header_layout.setContentsMargins(20, 0, 0, 0)
 
     logo_label = QLabel()
+    # Logo tetap ukuran asli
     pixmap = QPixmap(resource_path("icons/logo-kemenag.png")).scaled(90, 81, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
     logo_label.setPixmap(pixmap)
     logo_label.setAlignment(Qt.AlignVCenter)
 
+    # ✅ PERBAIKAN: Label teks yang fleksibel ukurannya
     text_label = QLabel("Kementerian<br>Agama <b style='color:#C1A910;'>Kota</b><br><b style='color:#C1A910;'>Malang</b>")
-    text_label.setFont(QFont(font_family, 15, QFont.Bold))
     text_label.setStyleSheet("color: white;")
     text_label.setTextFormat(Qt.RichText)
     text_label.setWordWrap(True)
     text_label.setAlignment(Qt.AlignVCenter)
+    text_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+    # ✅ Deteksi DPI
+    try:
+        import tkinter as tk
+        root = tk.Tk()
+        dpi = root.winfo_fpixels('1i')
+        root.destroy()
+    except Exception:
+        dpi = 96  # fallback jika gagal
+
+    # Mulai dari ukuran font berdasarkan DPI
+    font_size = 15 if dpi < 144 else 13
+    min_font_size = 9
+
+    # ✅ Dummy label untuk uji ketinggian
+    test_label = QLabel()
+    test_label.setText(text_label.text())
+    test_label.setTextFormat(Qt.RichText)
+    test_label.setWordWrap(True)
+    test_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+    test_label.setFixedWidth(200)
+
+    while font_size >= min_font_size:
+        font = QFont(font_family, font_size, QFont.Bold)
+        test_label.setFont(font)
+        test_label.adjustSize()
+        if test_label.sizeHint().height() <= 100:
+            break
+        font_size -= 1
+
+    text_label.setFont(QFont(font_family, font_size, QFont.Bold))
+
 
     header_layout.addWidget(logo_label)
     header_layout.addWidget(text_label)
@@ -131,6 +163,7 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
         btn.setObjectName(name)
         if icon_path:
             icon_full_path = resource_path(icon_path)
+            # Icon tetap ukuran asli
             icon_pix = QPixmap(icon_full_path).scaled(30, 30, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             btn.setIcon(QIcon(icon_pix))
             btn.setIconSize(QSize(50, 50))
@@ -149,6 +182,7 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
                 background-color: #C1A910;
             }
         """)
+        # Font button tetap ukuran asli
         btn.setFont(QFont(font_family, 12, QFont.Bold))
         button_widgets.append(btn)
         return btn
@@ -205,6 +239,7 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
     sidebar.addWidget(bottom_buttons_container)
 
     frame = QFrame()
+    # Width tetap seperti sebelumnya
     default_width = 320
     mini_width = logo_label.pixmap().width() + 40
 
