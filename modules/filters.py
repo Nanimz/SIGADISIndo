@@ -28,20 +28,17 @@ class FilterWidget(QWidget):
 
     def init_ui(self):
         font_family = load_montserrat_font()
-        self.setMaximumWidth(700)
+        self.setMaximumWidth(800)
         self.setStyleSheet("background-color: white;")
 
-        # Pastikan layout utama menempel ke atas
         outer_layout = QVBoxLayout(self)
         outer_layout.setContentsMargins(20, 20, 0, 0)
         outer_layout.setSpacing(10)
-        outer_layout.addStretch(0)  # Agar menempel ke atas
 
         title_label = QLabel("Filter")
         title_label.setFont(QFont(font_family, 12, QFont.Bold))
         outer_layout.addWidget(title_label)
 
-        # Layout untuk combo dan label filter
         grid = QGridLayout()
         grid.setHorizontalSpacing(20)
         grid.setVerticalSpacing(10)
@@ -49,12 +46,12 @@ class FilterWidget(QWidget):
         filter_data = [
             ("Jenjang Sekolah", ["Semua", "SD", "SMP", "SMA", "SMK"]),
             ("Status Pegawai", ["Semua", "PNS", "NON PNS", "PPPK"]),
+            ("Golongan", ["Semua", "III/a", "III/b","III/c","III/d","IV/a","IV/b","IV/c","IV/d","IV/e","IX","X", "XI", "xII"]),
             ("Jenis Kelamin", ["Semua", "L", "P"]),
             ("Masa Kerja", ["Semua"] + [f"{i}-{i+5}" for i in range(0, 50, 5)]),
             ("Sertifikasi", ["Semua", "Sudah", "Belum"]),
             ("Inpassing", ["Semua", "Sudah", "Belum"]),
             ("Usia", ["Semua", "25-30", "30-35", "35-40", "40-45", "45-50", "55-60"]),
-            ("Pensiun", ["Semua", "Sudah", "Belum"]),
         ]
 
         count = 0
