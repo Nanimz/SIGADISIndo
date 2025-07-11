@@ -7,6 +7,7 @@ valid_filter_columns = {}
 FILTER_COLUMN_MAP = {
     "Jenjang Sekolah": "JENJANG SEKOLAH",
     "Status Pegawai": "STATUS PEGAWAI",
+    "Golongan": "GOLONGAN",
     "Jenis Kelamin": "JENIS KELAMIN",
     "Sertifikasi": "SERTIFIKASI",
     "Inpassing": "INPASSING",
