@@ -43,7 +43,7 @@ def create_header(toggle_callback=None):
 
     # ✅ Font Montserrat dengan fallback
     font_family = load_montserrat_font()
-    text_label = QLabel("Aplikasi Manajemen Simpai")
+    text_label = QLabel("Aplikasi Manajemen SIGADISIndo")
     text_label.setStyleSheet("color: white; font-size: 50px; font-weight: bold;")
     text_label.setFont(QFont(font_family, 20, QFont.Bold))
     text_label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)

@@ -28,14 +28,12 @@ def create_data_table():
     table_view.setSortingEnabled(True)
     table_view.verticalHeader().setVisible(False)
     
-    # PERBAIKAN: Gunakan setMinimumHeight dan setMaximumHeight untuk kontrol yang lebih baik
-    table_view.setMinimumHeight(502)
-    table_view.setMaximumHeight(502)
-    # Hapus setFixedHeight(500) yang sebelumnya
+    table_view.setMinimumHeight(528)
+    table_view.setMaximumHeight(528)
+
     
     table_view.setWordWrap(False)
 
-    # PERBAIKAN: Gunakan kebijakan size yang lebih fleksibel
     table_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
     # StyleSheet tetap sama

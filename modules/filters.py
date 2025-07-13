@@ -46,13 +46,18 @@ class FilterWidget(QWidget):
         filter_data = [
             ("Jenjang Sekolah", ["Semua", "SD", "SMP", "SMA", "SMK"]),
             ("Status Pegawai", ["Semua", "PNS", "NON PNS", "PPPK"]),
-            ("Golongan", ["Semua", "III/a", "III/b","III/c","III/d","IV/a","IV/b","IV/c","IV/d","IV/e","IX","X", "XI", "xII"]),
+            ("Golongan", ["Semua", "III/a", "III/b", "III/c", "III/d", "IV/a", "IV/b", "IV/c", "IV/d", "IV/e", "IX", "X", "XI", "XII"]),
             ("Jenis Kelamin", ["Semua", "L", "P"]),
-            ("Masa Kerja", ["Semua"] + [f"{i}-{i+5}" for i in range(0, 50, 5)]),
+            ("Masa Kerja", [
+                "Semua",
+                "0-5", "6-10", "11-15", "16-20", "21-25",
+                "26-30", "31-35", "36-40", "41-45", "46-50"
+            ]),
             ("Sertifikasi", ["Semua", "Sudah", "Belum"]),
             ("Inpassing", ["Semua", "Sudah", "Belum"]),
-            ("Usia", ["Semua", "25-30", "30-35", "35-40", "40-45", "45-50", "55-60"]),
+            ("Usia", ["Semua", "25-30", "31-35", "36-40", "41-45", "46-50", "51-55", "56-60", "60 ke atas"]),
         ]
+
 
         count = 0
         for label_text, options in filter_data:

@@ -36,7 +36,7 @@ class StatusSection(QWidget):
         """)
 
         self.layout = QHBoxLayout()
-        self.layout.setContentsMargins(39, 0, 39, 15)
+        self.layout.setContentsMargins(39, 0, 39, 10)
         self.layout.setSpacing(10)
 
         self.total_label = QLabel("Total Baris: 0")

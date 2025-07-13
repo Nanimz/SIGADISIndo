@@ -64,8 +64,8 @@ def filter_data(filters):
                 try:
                     lower, upper = map(int, value.split("-"))
                     df[column] = pd.to_datetime(df[column], errors="coerce")
-                    df["USIA_TAHUN"] = (today - df[column]).dt.days // 365
-                    df = df[df["USIA_TAHUN"].between(lower, upper, inclusive="left")]
+                    df["USIA_TAHUN"] = ((today - df[column]).dt.days // 365).fillna(0).astype(int)
+                    df = df[df["USIA_TAHUN"].between(lower, upper, inclusive="both")]
                 except Exception as e:
                     print(f"❌ Gagal menghitung usia: {e}")
                     continue
@@ -76,7 +76,7 @@ def filter_data(filters):
                     df[column] = pd.to_datetime(df[column], errors="coerce")
                     masa_kerja_series = ((today - df[column]).dt.days // 365).fillna(0).astype(int)
                     df["MASA_KERJA_TAHUN"] = masa_kerja_series
-                    df = df[df["MASA_KERJA_TAHUN"].between(lower, upper, inclusive="left")]
+                    df = df[df["MASA_KERJA_TAHUN"].between(lower, upper, inclusive="both")]
                 except Exception as e:
                     print(f"❌ Gagal menghitung masa kerja: {e}")
                     continue

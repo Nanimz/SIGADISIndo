@@ -29,7 +29,7 @@ from functions.resume_dialog import ResumeDialog
 class GpaidiaApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Aplikasi Manajemen Simpai")
+        self.setWindowTitle("Aplikasi Manajemen SIGADISIndo")
         self.setWindowIcon(QIcon(resource_path("icons/splash.png")))
         
         # PERBAIKAN: Set ukuran minimum window yang cukup besar

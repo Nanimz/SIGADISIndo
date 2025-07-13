@@ -118,7 +118,7 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
 
     # Mulai dari ukuran font berdasarkan DPI
     font_size = 15 if dpi < 144 else 13
-    min_font_size = 9
+    min_font_size = 14
 
     # ✅ Dummy label untuk uji ketinggian
     test_label = QLabel()
