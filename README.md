@@ -50,6 +50,10 @@ SIGADISIndo adalah sistem informasi yang dikembangkan untuk membantu dalam menge
    python main.py
    ```
 
+## 🖥️ Tampilan Aplikasi
+
+![App Logo](icons/TAMPILAN.png)
+
 ## 📌 Catatan Tambahan
 
 - Proyek ini dibuat sebagai bagian dari kegiatan **magang di Kantor Kementerian Agama Kota Malang**, dengan tujuan membantu digitalisasi dan pengelolaan data guru Pendidikan Agama Islam (PAI).
