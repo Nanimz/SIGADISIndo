@@ -20,7 +20,7 @@ class PandasTableModel(QAbstractTableModel):
             return str(value)
 
         elif role == Qt.TextAlignmentRole:
-            return Qt.AlignCenter  # ✅ Rata tengah semua isi sel
+            return Qt.AlignCenter
 
         return QVariant()
 
@@ -29,7 +29,6 @@ class PandasTableModel(QAbstractTableModel):
             return QVariant()
 
         if orientation == Qt.Horizontal:
-            # ✅ Selalu tampilkan header dalam huruf besar
             return str(self._dataframe.columns[section]).upper()
         else:
             return str(section + 1)

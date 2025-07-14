@@ -14,7 +14,6 @@ def show_deskripsi_dialog():
     content_widget = QWidget()
     content_layout = QVBoxLayout(content_widget)
 
-    # Konten teks panduan dengan HTML styling
     panduan_teks = """
     <h2 style='color:#2c3e50;'>Selamat Datang di <span style='color:#1abc9c;'>Aplikasi Manajemen GPAIDIA</span>!</h2>
     <p style='font-size:12pt;'>

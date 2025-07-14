@@ -27,7 +27,7 @@ def create_header(toggle_callback=None):
     layout.setContentsMargins(33, 0, 33, 0)
     layout.setSpacing(30)
 
-    # ✅ Logo menu (pakai resource_path)
+    # Logo menu
     logo_label = QLabel()
     pixmap = QPixmap(resource_path("icons/menu.png"))
     if not pixmap.isNull():
@@ -41,7 +41,7 @@ def create_header(toggle_callback=None):
             toggle_callback()
         logo_label.mousePressEvent = on_click
 
-    # ✅ Font Montserrat dengan fallback
+    # Font Montserrat
     font_family = load_montserrat_font()
     text_label = QLabel("Aplikasi Manajemen SIGADISIndo")
     text_label.setStyleSheet("color: white; font-size: 50px; font-weight: bold;")

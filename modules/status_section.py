@@ -4,12 +4,10 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QSizePolicy
 from PyQt5.QtGui import QFont, QFontDatabase
 from PyQt5.QtCore import Qt
 
-
 def resource_path(relative_path):
     """Mengembalikan path absolut, baik saat run .py atau .exe"""
     base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))
     return os.path.join(base_path, relative_path)
-
 
 def load_montserrat_font():
     font_path = resource_path(os.path.join("assets", "montserrat", "static", "Montserrat-Bold.ttf"))
@@ -22,12 +20,9 @@ def load_montserrat_font():
         return "Arial"
     return families[0]
 
-
 class StatusSection(QWidget):
     def __init__(self):
         super().__init__()
-
-        # Gunakan font Montserrat jika tersedia
         self.font_family = load_montserrat_font()
 
         self.setStyleSheet("""

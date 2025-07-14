@@ -65,7 +65,7 @@ class ResumeDialog(QDialog):
 
         layout.addSpacing(15)
 
-        # Tombol Save to Word (tanpa tombol OK)
+        # Tombol Save to Word
         save_button = QPushButton("💾 Save to Word")
         save_button.setFont(QFont(font_family, 10, QFont.Bold))
         save_button.setCursor(Qt.PointingHandCursor)
@@ -91,7 +91,6 @@ class ResumeDialog(QDialog):
             try:
                 doc = Document()
 
-                # Judul di tengah
                 title = doc.add_paragraph()
                 run = title.add_run("Ringkasan Data")
                 run.bold = True
@@ -106,10 +105,8 @@ class ResumeDialog(QDialog):
 
                 doc.save(file_path)
 
-                # ✅ Notifikasi Berhasil
+                # Notifikasi Berhasil dan Gagal
                 QMessageBox.information(self, "Berhasil", "File Word berhasil disimpan!")
-
             except Exception as e:
-                # ❌ Notifikasi Gagal
                 QMessageBox.critical(self, "Gagal", f"Gagal menyimpan file Word.\n\nError:\n{str(e)}")
 

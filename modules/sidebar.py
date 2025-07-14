@@ -9,7 +9,6 @@ from PyQt5.QtCore import Qt, QSize
 from modules.data_table import get_data_table
 from functions.display_table import get_loaded_data
 
-# ✅ Tambahan: import dialog tutorial
 from modules.tutorial_dialog import show_tutorial_dialog
 from modules.deskripsi_dialog import show_deskripsi_dialog
 
@@ -86,7 +85,6 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
     sidebar.setSpacing(10)
     sidebar.setAlignment(Qt.AlignTop)
 
-    # Header container tetap sama seperti sebelumnya
     header_container = QWidget()
     header_container.setFixedHeight(112)
     header_layout = QHBoxLayout()
@@ -94,12 +92,10 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
     header_layout.setContentsMargins(20, 0, 0, 0)
 
     logo_label = QLabel()
-    # Logo tetap ukuran asli
     pixmap = QPixmap(resource_path("icons/logo-kemenag.png")).scaled(90, 81, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
     logo_label.setPixmap(pixmap)
     logo_label.setAlignment(Qt.AlignVCenter)
 
-    # ✅ PERBAIKAN: Label teks yang fleksibel ukurannya
     text_label = QLabel("Kementerian<br>Agama <b style='color:#C1A910;'>Kota</b><br><b style='color:#C1A910;'>Malang</b>")
     text_label.setStyleSheet("color: white;")
     text_label.setTextFormat(Qt.RichText)
@@ -107,20 +103,19 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
     text_label.setAlignment(Qt.AlignVCenter)
     text_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-    # ✅ Deteksi DPI
+    # Deteksi DPI
     try:
         import tkinter as tk
         root = tk.Tk()
         dpi = root.winfo_fpixels('1i')
         root.destroy()
     except Exception:
-        dpi = 96  # fallback jika gagal
+        dpi = 96
 
     # Mulai dari ukuran font berdasarkan DPI
     font_size = 15 if dpi < 144 else 13
     min_font_size = 14
 
-    # ✅ Dummy label untuk uji ketinggian
     test_label = QLabel()
     test_label.setText(text_label.text())
     test_label.setTextFormat(Qt.RichText)
@@ -137,7 +132,6 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
         font_size -= 1
 
     text_label.setFont(QFont(font_family, font_size, QFont.Bold))
-
 
     header_layout.addWidget(logo_label)
     header_layout.addWidget(text_label)
@@ -163,7 +157,6 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
         btn.setObjectName(name)
         if icon_path:
             icon_full_path = resource_path(icon_path)
-            # Icon tetap ukuran asli
             icon_pix = QPixmap(icon_full_path).scaled(30, 30, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             btn.setIcon(QIcon(icon_pix))
             btn.setIconSize(QSize(50, 50))
@@ -182,12 +175,10 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
                 background-color: #C1A910;
             }
         """)
-        # Font button tetap ukuran asli
         btn.setFont(QFont(font_family, 12, QFont.Bold))
         button_widgets.append(btn)
         return btn
 
-    # Tambahkan tombol-tombol atas
     for name, icon in buttons_top:
         btn = create_button(name, icon)
         if name == "Load File" and on_load_callback:
@@ -209,7 +200,6 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
             btn.clicked.connect(handle_export)
         sidebar.addWidget(btn)
 
-    # PERBAIKAN: Buat container khusus untuk tombol-tombol bawah
     bottom_buttons_container = QWidget()
     bottom_buttons_layout = QVBoxLayout()
     bottom_buttons_layout.setContentsMargins(0, 0, 0, 0)
@@ -231,15 +221,12 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
             btn.clicked.connect(show_deskripsi_dialog)
         
         bottom_buttons_layout.addWidget(btn)
-    
     bottom_buttons_container.setLayout(bottom_buttons_layout)
     
-    # Tambahkan stretch yang lebih controlled
     sidebar.addStretch(1)
     sidebar.addWidget(bottom_buttons_container)
 
     frame = QFrame()
-    # Width tetap seperti sebelumnya
     default_width = 320
     mini_width = logo_label.pixmap().width() + 40
 
@@ -250,7 +237,6 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
     def toggle_sidebar(mini: bool):
         if mini:
             frame.setFixedWidth(mini_width)
-            # Update semua tombol (termasuk tombol bawah)
             all_buttons = button_widgets + bottom_button_widgets
             for btn in all_buttons:
                 btn.setText("")
@@ -270,7 +256,6 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
             text_label.setVisible(False)
         else:
             frame.setFixedWidth(default_width)
-            # Update semua tombol (termasuk tombol bawah)
             all_buttons = button_widgets + bottom_button_widgets
             for btn in all_buttons:
                 btn.setText(f"   {btn.objectName()}")
@@ -290,5 +275,4 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
                     }
                 """)
             text_label.setVisible(True)
-
     return frame, toggle_sidebar

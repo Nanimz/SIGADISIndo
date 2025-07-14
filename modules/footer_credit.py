@@ -20,7 +20,6 @@ class FooterCredit(QWidget):
         layout.setSpacing(2)
         layout.setAlignment(Qt.AlignRight | Qt.AlignBottom)
 
-        # Path ikon menggunakan resource_path
         icon_path = resource_path("icons/copyright.png")
         icon_pixmap = QPixmap(icon_path)
 

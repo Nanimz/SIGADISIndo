@@ -25,16 +25,14 @@ from functions.pandas_table_model import PandasTableModel
 from functions.filter_workers import FilterWorker
 from functions.resume_dialog import ResumeDialog
 
-
 class GpaidiaApp(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Aplikasi Manajemen SIGADISIndo")
         self.setWindowIcon(QIcon(resource_path("icons/splash.png")))
         
-        # PERBAIKAN: Set ukuran minimum window yang cukup besar
         self.setMinimumSize(1200, 800)
-        self.setGeometry(100, 100, 1400, 900)  # Ukuran default lebih besar
+        self.setGeometry(100, 100, 1400, 900)
         
         self.is_sidebar_mini = False
         self.result_box_widget = None
@@ -53,7 +51,6 @@ class GpaidiaApp(QWidget):
         self.setStyleSheet("background-color: white;")
 
     def setup_ui(self):
-        # PERBAIKAN: Layout utama dengan margin dan spacing yang konsisten
         self.main_layout = QHBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
@@ -64,17 +61,15 @@ class GpaidiaApp(QWidget):
         self.filter_widget.setMinimumWidth(450)
         self.filter_widget.filter_changed.connect(self.apply_filter)
 
-        # PERBAIKAN: Sidebar dengan size policy yang tepat
         self.sidebar_frame, self.sidebar_state_handler = create_sidebar(
             on_load_callback=self.handle_file_loaded,
             filter_widget=self.filter_widget,
             on_reset_callback=self.reset_filters
         )
-        # Set size policy untuk sidebar agar tidak mengambil ruang berlebihan
+
         self.sidebar_frame.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.main_layout.addWidget(self.sidebar_frame)
 
-        # PERBAIKAN: Content area dengan layout yang lebih stabil
         self.content_layout = QVBoxLayout()
         self.content_layout.setContentsMargins(0, 0, 0, 0)
         self.content_layout.setSpacing(0)
@@ -83,7 +78,6 @@ class GpaidiaApp(QWidget):
         header_widget = create_header(toggle_callback=self.toggle_sidebar)
         self.content_layout.addWidget(header_widget)
 
-        # PERBAIKAN: Filter dan result box dengan layout yang lebih stabil
         self.filter_result_layout = QHBoxLayout()
         self.filter_result_layout.setContentsMargins(20, 10, 20, 10)
         self.filter_result_layout.setSpacing(30)
@@ -91,11 +85,9 @@ class GpaidiaApp(QWidget):
         self.result_box_widget = ResultBoxWidget()
         self.result_box_widget.resume_clicked.connect(self.show_resume_dialog)
 
-        # PERBAIKAN: Gunakan stretch ratio yang lebih seimbang
         self.filter_result_layout.addWidget(self.filter_widget, stretch=2, alignment=Qt.AlignTop)
         self.filter_result_layout.addWidget(self.result_box_widget, stretch=1, alignment=Qt.AlignTop)
 
-        # PERBAIKAN: Container untuk filter dan result dengan size policy yang tepat
         filter_result_container = QWidget()
         filter_result_container.setLayout(self.filter_result_layout)
         filter_result_container.setStyleSheet("background-color: white;")
@@ -106,18 +98,16 @@ class GpaidiaApp(QWidget):
         search_widget, self.search_input = create_search_bar(self.search_data)
         self.content_layout.addWidget(search_widget)
 
-        # PERBAIKAN: Table dan status section dengan wrapper yang lebih stabil
+        # Table
         table_container = create_data_table()
         table_view = get_data_table()
         table_view.doubleClicked.connect(self.show_row_preview)
 
-        # PERBAIKAN: Wrapper untuk table dan status dengan size policy yang tepat
         table_and_status_wrapper = QWidget()
         table_and_status_layout = QVBoxLayout()
         table_and_status_layout.setContentsMargins(0, 0, 0, 5)
         table_and_status_layout.setSpacing(5)
 
-        # PERBAIKAN: Table container dengan size policy yang tepat
         table_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         table_and_status_layout.addWidget(table_container)
 
@@ -126,24 +116,19 @@ class GpaidiaApp(QWidget):
         self.status_section.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         table_and_status_layout.addWidget(self.status_section)
 
-        # PERBAIKAN: Wrapper dengan size policy yang tepat
         table_and_status_wrapper.setLayout(table_and_status_layout)
         table_and_status_wrapper.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.content_layout.addWidget(table_and_status_wrapper)
 
-        # PERBAIKAN: Footer dengan size policy yang tepat
+        # Footer
         footer = FooterCredit()
         footer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.content_layout.addWidget(footer)
-
-        # PERBAIKAN: Tambahkan stretch di akhir untuk mendorong semua ke atas
         self.content_layout.addStretch(1)
 
-        # Selection model setup
         if table_view.selectionModel():
             table_view.selectionModel().selectionChanged.connect(self.on_selection_changed)
 
-        # PERBAIKAN: Content widget dengan size policy yang tepat
         content_widget = QWidget()
         content_widget.setLayout(self.content_layout)
         content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -155,10 +140,10 @@ class GpaidiaApp(QWidget):
 
     def show_resume_dialog(self):
         try:
-            # Ambil filter aktif dari FilterWidget
+            # Ambil filter aktif
             filters = self.filter_widget.get_current_filters()
-            
-            # Ambil nilai-nilai box hasil
+
+            # Ambil nilai-nilai dari result box
             counts = {
                 label: self.result_box_widget.box_labels[label].text()
                 for label in ["Jumlah PNS", "Jumlah NON PNS", "Jumlah PPPK", "Jumlah Sekolah"]
@@ -175,7 +160,7 @@ class GpaidiaApp(QWidget):
         self.is_sidebar_mini = not self.is_sidebar_mini
         self.sidebar_state_handler(self.is_sidebar_mini)
         
-        # PERBAIKAN: Force update layout setelah toggle
+        # Force update layout setelah toggle
         self.main_layout.update()
         self.updateGeometry()
 
@@ -186,20 +171,17 @@ class GpaidiaApp(QWidget):
         if path:
             load_data(path)
             
-            # PERBAIKAN: Lebih careful dalam mengganti filter widget
             old_filter = self.filter_widget
             self.filter_result_layout.removeWidget(old_filter)
             old_filter.setParent(None)
-            old_filter.deleteLater()  # Pastikan widget lama dihapus
+            old_filter.deleteLater()
 
             self.filter_widget = create_filter_section(available_filters=valid_filter_columns)
             self.filter_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
             self.filter_widget.filter_changed.connect(self.apply_filter)
             self.filter_widget.setMinimumWidth(450)
             
-            # PERBAIKAN: Insert dengan stretch yang konsisten
             self.filter_result_layout.insertWidget(0, self.filter_widget, stretch=2, alignment=Qt.AlignTop)
-
             self.reset_filters()
 
     def reset_filters(self):
@@ -274,10 +256,8 @@ class GpaidiaApp(QWidget):
     def search_data(self, text):
         self.search_timer.start(300)
 
-    # PERBAIKAN: Tambahkan method untuk handle resize event
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        # Update layout ketika window diresize
         self.main_layout.update()
 
     def show_row_preview(self, index):

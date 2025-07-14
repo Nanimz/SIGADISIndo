@@ -58,7 +58,6 @@ class FilterWidget(QWidget):
             ("Usia", ["Semua", "25-30", "31-35", "36-40", "41-45", "46-50", "51-55", "56-60", "60 ke atas"]),
         ]
 
-
         count = 0
         for label_text, options in filter_data:
             if self.available_filters and label_text not in self.available_filters:
@@ -90,7 +89,7 @@ class FilterWidget(QWidget):
             self.filter_combos[label_text] = combo
             combo.currentTextChanged.connect(self.on_filter_changed)
 
-            row = count % 4  # Ubah menjadi 4 baris
+            row = count % 4
             col = (count // 4) * 2
             grid.addWidget(label, row, col)
             grid.addWidget(combo, row, col + 1)
