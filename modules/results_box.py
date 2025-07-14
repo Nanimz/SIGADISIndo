@@ -42,7 +42,7 @@ class ResultBoxWidget(QWidget):
                 border-radius: 8px;
                 padding: 0px;
             """)
-            box_container.setFixedHeight(103)
+            box_container.setFixedHeight(92)
             box_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
             inner_layout = QVBoxLayout()
