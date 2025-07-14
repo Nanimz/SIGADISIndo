@@ -19,37 +19,65 @@ SIGADISIndo adalah sistem informasi yang dikembangkan untuk membantu dalam menge
 
 ## 🚀 Cara Menjalankan
 
-1. Clone Repository
+1. **Clone Repository**
 
    ```bash
    git clone https://github.com/Nanimz/SIGADISIndo.git
+   cd SIGADISIndo
    ```
 
-2. Install Dependensi
+2. **(Opsional) Buat dan Aktifkan Virtual Environment**
+
+   ```bash
+   # Windows
+   python -m venv venv
+   .\venv\Scripts\activate
+
+   # Mac/Linux
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+3. **Install Dependensi**
 
    ```bash
    pip install PyQt5 pandas openpyxl python-docx
    ```
 
-3. Jalankan Aplikasi
+4. **Jalankan Aplikasi**
+
    ```bash
-   python ./main.py
+   python main.py
    ```
-
-## ✨ Fitur Utama
-
-- Manajemen data guru PAI
-- Antarmuka pengguna berbasis PyQt5
-- Fitur pencarian dan filter data
-- Ekspor data ke Word atau Excel
-- Struktur modular memudahkan pengembangan dan pemeliharaan
-
-## 📷 Tampilan Aplikasi
-
-![Tampilan Aplikasi](icons/TAMPILAN.png)
 
 ## 📌 Catatan Tambahan
 
-- Proyek ini dibuat sebagai bagian dari kegiatan magang di Kantor Kementerian Agama Kota Malang, dengan tujuan membantu digitalisasi dan pengelolaan data guru Pendidikan Agama Islam (PAI).
-- Folder `venv/` tidak termasuk dalam versi Git dan apabila ingin membuat virtual enviroment maka sebaiknya dibuat ulang secara lokal dan mulai menginstall semua dependensi yang diperlukan di dalamnya.
-- File antarmuka pengguna dibuat dengan Qt Designer dan dapat diedit ulang melalui file .ui yang terdapat di folder UI/.
+- Proyek ini dibuat sebagai bagian dari kegiatan **magang di Kantor Kementerian Agama Kota Malang**, dengan tujuan membantu digitalisasi dan pengelolaan data guru Pendidikan Agama Islam (PAI).
+- Folder `venv/` **tidak disertakan** dalam repositori. Jika ingin menjalankan proyek ini, buat virtual environment secara lokal dan install semua dependensi yang dibutuhkan.
+- File antarmuka pengguna dibuat dengan **Qt Designer**, dan dapat diedit melalui file `.ui` yang berada di dalam folder `UI/`.
+- Jika Anda ingin mengubah proyek ini menjadi aplikasi desktop mandiri (.exe), Anda bisa menggunakan **[auto-py-to-exe](https://github.com/brentvollebregt/auto-py-to-exe)**. Berikut langkah-langkahnya:
+
+  1. **Instal auto-py-to-exe**
+
+     ```bash
+     pip install auto-py-to-exe
+     ```
+
+  2. **Jalankan auto-py-to-exe**
+
+     ```bash
+     auto-py-to-exe
+     ```
+
+  3. **Konfigurasi di GUI auto-py-to-exe:**
+
+     - Pilih file utama: `main.py`
+     - Pilih opsi: **"One File"**
+     - Tambahkan folder seperti `assets/`, `icons/`, dan `UI/` pada bagian **"Additional Files"**
+     - Sesuaikan opsi lainnya sesuai kebutuhan
+
+  4. Klik **Convert .py to .exe**
+
+  5. File `.exe` akan muncul di folder `output/` dan dapat dijalankan langsung di Windows tanpa perlu menginstal Python.
+
+---
