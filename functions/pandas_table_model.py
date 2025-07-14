@@ -14,22 +14,24 @@ class PandasTableModel(QAbstractTableModel):
     def data(self, index, role=Qt.DisplayRole):
         if not index.isValid():
             return QVariant()
-        
+
         if role == Qt.DisplayRole:
             value = self._dataframe.iloc[index.row(), index.column()]
             return str(value)
 
         elif role == Qt.TextAlignmentRole:
-            return Qt.AlignCenter  # ✅ Bikin semua teks rata tengah
-        
+            return Qt.AlignCenter
+
         return QVariant()
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
         if role != Qt.DisplayRole:
             return QVariant()
+
         if orientation == Qt.Horizontal:
-            return str(self._dataframe.columns[section])
-        return str(section + 1)
+            return str(self._dataframe.columns[section]).upper()
+        else:
+            return str(section + 1)
 
     def set_dataframe(self, dataframe):
         self.beginResetModel()

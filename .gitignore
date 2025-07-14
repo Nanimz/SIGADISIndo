@@ -20,3 +20,5 @@ Thumbs.db
 *.log
 *.tmp
 temp/
+
+.xlsx

@@ -8,16 +8,15 @@ from PyQt5.QtCore import Qt
 class NoFocusRectStyle(QProxyStyle):
     def drawPrimitive(self, element, option, painter, widget=None):
         if element == QStyle.PE_FrameFocusRect:
-            return  # Jangan gambar kotak fokus
+            return
         super().drawPrimitive(element, option, painter, widget)
-
-_data_table_instance = None  # singleton instance
+_data_table_instance = None
 
 def create_data_table():
     global _data_table_instance
 
     table_view = QTableView()
-    table_view.setStyle(NoFocusRectStyle())  # 🔥 Hilangkan kotak fokus
+    table_view.setStyle(NoFocusRectStyle())
 
     table_view.setAlternatingRowColors(True)
     table_view.setSelectionBehavior(QTableView.SelectRows)
@@ -25,12 +24,12 @@ def create_data_table():
     table_view.horizontalHeader().setStretchLastSection(False)
     table_view.setSortingEnabled(True)
     table_view.verticalHeader().setVisible(False)
-    table_view.setFixedHeight(500)
+    
+    table_view.setMinimumHeight(528)
+    table_view.setMaximumHeight(528)
+    
     table_view.setWordWrap(False)
-
-    table_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
-    # ✅ StyleSheet lengkap: warna, hover, seleksi, scrollbar
+    table_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
     table_view.setStyleSheet("""
         QTableView {
             background-color: #ffffff;
@@ -103,8 +102,10 @@ def create_data_table():
     layout = QVBoxLayout()
     layout.setContentsMargins(40, 18, 40, 18)
     layout.addWidget(table_view)
-    layout.addStretch()
+    layout.addSpacing(10)
+    
     container.setLayout(layout)
+    container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
     _data_table_instance = table_view
     return container
@@ -125,9 +126,7 @@ def resize_columns_smart(table_view, sample_rows=30):
         return
 
     font_metrics = table_view.fontMetrics()
-
     for column in range(model.columnCount()):
-        # Hitung lebar header
         header_text = str(model.headerData(column, Qt.Horizontal, Qt.DisplayRole))
         max_width = font_metrics.boundingRect(header_text).width()
 
@@ -137,5 +136,5 @@ def resize_columns_smart(table_view, sample_rows=30):
             value = str(model.data(index, Qt.DisplayRole))
             max_width = max(max_width, font_metrics.boundingRect(value).width())
 
-        # Tambahkan padding ekstra
+        # Padding ekstra
         table_view.setColumnWidth(column, max_width + 40)

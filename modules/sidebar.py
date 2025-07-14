@@ -2,14 +2,13 @@ import os
 import sys
 from PyQt5.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFrame, QWidget,
-    QDialog, QCheckBox, QScrollArea, QDialogButtonBox
+    QDialog, QCheckBox, QScrollArea, QDialogButtonBox, QMessageBox, QSizePolicy
 )
 from PyQt5.QtGui import QPixmap, QFont, QIcon, QFontDatabase
 from PyQt5.QtCore import Qt, QSize
 from modules.data_table import get_data_table
 from functions.display_table import get_loaded_data
 
-# ✅ Tambahan: import dialog tutorial
 from modules.tutorial_dialog import show_tutorial_dialog
 from modules.deskripsi_dialog import show_deskripsi_dialog
 
@@ -98,11 +97,41 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
     logo_label.setAlignment(Qt.AlignVCenter)
 
     text_label = QLabel("Kementerian<br>Agama <b style='color:#C1A910;'>Kota</b><br><b style='color:#C1A910;'>Malang</b>")
-    text_label.setFont(QFont(font_family, 16, QFont.Bold))
     text_label.setStyleSheet("color: white;")
     text_label.setTextFormat(Qt.RichText)
     text_label.setWordWrap(True)
     text_label.setAlignment(Qt.AlignVCenter)
+    text_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+    # Deteksi DPI
+    try:
+        import tkinter as tk
+        root = tk.Tk()
+        dpi = root.winfo_fpixels('1i')
+        root.destroy()
+    except Exception:
+        dpi = 96
+
+    # Mulai dari ukuran font berdasarkan DPI
+    font_size = 15 if dpi < 144 else 13
+    min_font_size = 14
+
+    test_label = QLabel()
+    test_label.setText(text_label.text())
+    test_label.setTextFormat(Qt.RichText)
+    test_label.setWordWrap(True)
+    test_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+    test_label.setFixedWidth(200)
+
+    while font_size >= min_font_size:
+        font = QFont(font_family, font_size, QFont.Bold)
+        test_label.setFont(font)
+        test_label.adjustSize()
+        if test_label.sizeHint().height() <= 100:
+            break
+        font_size -= 1
+
+    text_label.setFont(QFont(font_family, font_size, QFont.Bold))
 
     header_layout.addWidget(logo_label)
     header_layout.addWidget(text_label)
@@ -150,7 +179,6 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
         button_widgets.append(btn)
         return btn
 
-
     for name, icon in buttons_top:
         btn = create_button(name, icon)
         if name == "Load File" and on_load_callback:
@@ -161,25 +189,42 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
             btn.clicked.connect(show_columns_dialog)
         elif name == "Save to Excel":
             from functions.export_excel import export_current_table_to_excel
-            btn.clicked.connect(export_current_table_to_excel)
+            def handle_export():
+                success, message = export_current_table_to_excel()
+                msg = QMessageBox()
+                msg.setWindowTitle("Export Excel")
+                msg.setText(message)
+                msg.setIcon(QMessageBox.Information if success else QMessageBox.Critical)
+                msg.exec_()
+
+            btn.clicked.connect(handle_export)
         sidebar.addWidget(btn)
 
-    sidebar.addStretch(1)
-
+    bottom_buttons_container = QWidget()
+    bottom_buttons_layout = QVBoxLayout()
+    bottom_buttons_layout.setContentsMargins(0, 0, 0, 0)
+    bottom_buttons_layout.setSpacing(10)
+    
     buttons_bottom = [
         ("Tutorial", "icons/tutorial.png"),
         ("Deskripsi", "icons/deskripsi.png"),
     ]
+    
+    bottom_button_widgets = []
     for name, icon in buttons_bottom:
         btn = create_button(name, icon)
-
-        # ✅ Tambahkan aksi jika tombol tutorial ditekan
+        bottom_button_widgets.append(btn)
+        
         if name == "Tutorial":
             btn.clicked.connect(show_tutorial_dialog)
         elif name == "Deskripsi":
             btn.clicked.connect(show_deskripsi_dialog)
-
-        sidebar.addWidget(btn)
+        
+        bottom_buttons_layout.addWidget(btn)
+    bottom_buttons_container.setLayout(bottom_buttons_layout)
+    
+    sidebar.addStretch(1)
+    sidebar.addWidget(bottom_buttons_container)
 
     frame = QFrame()
     default_width = 320
@@ -192,7 +237,8 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
     def toggle_sidebar(mini: bool):
         if mini:
             frame.setFixedWidth(mini_width)
-            for btn in button_widgets:
+            all_buttons = button_widgets + bottom_button_widgets
+            for btn in all_buttons:
                 btn.setText("")
                 btn.setStyleSheet("""
                     QPushButton {
@@ -210,7 +256,8 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
             text_label.setVisible(False)
         else:
             frame.setFixedWidth(default_width)
-            for btn in button_widgets:
+            all_buttons = button_widgets + bottom_button_widgets
+            for btn in all_buttons:
                 btn.setText(f"   {btn.objectName()}")
                 btn.setStyleSheet("""
                     QPushButton {
@@ -228,5 +275,4 @@ def create_sidebar(on_load_callback=None, filter_widget=None, on_reset_callback=
                     }
                 """)
             text_label.setVisible(True)
-
     return frame, toggle_sidebar

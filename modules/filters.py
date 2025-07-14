@@ -28,8 +28,9 @@ class FilterWidget(QWidget):
 
     def init_ui(self):
         font_family = load_montserrat_font()
-        self.setMaximumWidth(700)
+        self.setMaximumWidth(800)
         self.setStyleSheet("background-color: white;")
+
         outer_layout = QVBoxLayout(self)
         outer_layout.setContentsMargins(20, 20, 0, 0)
         outer_layout.setSpacing(10)
@@ -45,10 +46,16 @@ class FilterWidget(QWidget):
         filter_data = [
             ("Jenjang Sekolah", ["Semua", "SD", "SMP", "SMA", "SMK"]),
             ("Status Pegawai", ["Semua", "PNS", "NON PNS", "PPPK"]),
+            ("Golongan", ["Semua", "III/a", "III/b", "III/c", "III/d", "IV/a", "IV/b", "IV/c", "IV/d", "IV/e", "IX", "X", "XI", "XII"]),
             ("Jenis Kelamin", ["Semua", "L", "P"]),
+            ("Masa Kerja", [
+                "Semua",
+                "0-5", "6-10", "11-15", "16-20", "21-25",
+                "26-30", "31-35", "36-40", "41-45", "46-50"
+            ]),
             ("Sertifikasi", ["Semua", "Sudah", "Belum"]),
             ("Inpassing", ["Semua", "Sudah", "Belum"]),
-            ("Pensiun", ["Semua", "Sudah", "Belum"]),
+            ("Usia", ["Semua", "25-30", "31-35", "36-40", "41-45", "46-50", "51-55", "56-60", "60 ke atas"]),
         ]
 
         count = 0
@@ -82,8 +89,8 @@ class FilterWidget(QWidget):
             self.filter_combos[label_text] = combo
             combo.currentTextChanged.connect(self.on_filter_changed)
 
-            row = count % 3
-            col = (count // 3) * 2
+            row = count % 4
+            col = (count // 4) * 2
             grid.addWidget(label, row, col)
             grid.addWidget(combo, row, col + 1)
             count += 1

@@ -21,30 +21,23 @@ def load_montserrat_font():
 
 def create_search_bar(on_search_text_changed=None):
     font_family = load_montserrat_font()
-
-    # Container utama (vertikal)
     wrapper_layout = QVBoxLayout()
     wrapper_layout.setContentsMargins(35, 10, 0, 0)
-
-    # Layout horizontal (label + input)
     layout = QHBoxLayout()
     layout.setSpacing(8)
 
-    # Label "Cari Data"
     title_label = QLabel("Cari Data")
     title_label.setFont(QFont(font_family, 12))
-    title_label.setFixedWidth(170)
+    title_label.setFixedWidth(196)
     title_label.setStyleSheet("QLabel { padding-bottom: 2px; }")
     layout.addWidget(title_label, alignment=Qt.AlignVCenter)
 
-    # Kontainer input pencarian
     input_container = QWidget()
-    input_container.setFixedSize(507, 35)
+    input_container.setFixedSize(581, 35)
     input_container.setStyleSheet("background: transparent;")
 
-    # Input QLineEdit
     search_input = QLineEdit(input_container)
-    search_input.setGeometry(0, 0, 507, 35)
+    search_input.setGeometry(0, 0, 581, 35)
     search_input.setStyleSheet(f"""
         QLineEdit {{
             border: 1px solid black;
@@ -60,11 +53,11 @@ def create_search_bar(on_search_text_changed=None):
     if on_search_text_changed:
         search_input.textChanged.connect(on_search_text_changed)
 
-    # Tombol ikon pencarian (pakai resource_path)
+    # Tombol ikon pencarian 
     search_icon_btn = QPushButton(input_container)
     search_icon_btn.setIcon(QIcon(resource_path("icons/search.png")))
     search_icon_btn.setIconSize(search_icon_btn.size())
-    search_icon_btn.setGeometry(472, 5, 24, 24)
+    search_icon_btn.setGeometry(540, 5, 24, 24)
     search_icon_btn.setStyleSheet("""
         QPushButton {
             border: none;

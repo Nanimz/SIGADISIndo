@@ -4,16 +4,19 @@ from modules.data_table import get_data_table
 
 def export_current_table_to_excel():
     table = get_data_table()
-    model = table.model()
+    if table is None or table.model() is None:
+        return False, "❌ Tidak ada data untuk disimpan."
 
-    if model is None:
-        return
+    model = table.model()
 
     # Ambil hanya kolom yang terlihat
     visible_columns = [
         i for i in range(model.columnCount())
         if not table.isColumnHidden(i)
     ]
+
+    if not visible_columns:
+        return False, "❌ Tidak ada kolom yang ditampilkan untuk disimpan."
 
     headers = [model.headerData(i, table.horizontalHeader().orientation()) for i in visible_columns]
 
@@ -34,4 +37,10 @@ def export_current_table_to_excel():
     if path:
         if not path.endswith(".xlsx"):
             path += ".xlsx"
-        df.to_excel(path, index=False)
+        try:
+            df.to_excel(path, index=False)
+            return True, f"✅ Data berhasil disimpan:\n{path}"
+        except Exception as e:
+            return False, f"❌ Gagal menyimpan data:\n{str(e)}"
+
+    return False, "❌ Operasi dibatalkan."

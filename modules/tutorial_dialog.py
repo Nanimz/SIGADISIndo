@@ -16,7 +16,6 @@ def show_tutorial_dialog():
     content_widget = QWidget()
     content_layout = QVBoxLayout(content_widget)
 
-    # Teks tutorial dengan gaya HTML dan emoji
     tutorial_text = """
     <h2 style='color:#2c3e50;'>📘 Cara Menggunakan Aplikasi</h2>
     <p style='font-size:12pt;'>Berikut adalah langkah-langkah menggunakan fitur-fitur utama:</p>
@@ -60,7 +59,6 @@ def show_tutorial_dialog():
     scroll_area.setWidget(content_widget)
     layout.addWidget(scroll_area)
 
-    # Tombol Tutup
     button_box = QDialogButtonBox(QDialogButtonBox.Close)
     button_box.rejected.connect(dialog.reject)
     layout.addWidget(button_box)

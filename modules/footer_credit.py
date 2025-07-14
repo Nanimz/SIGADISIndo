@@ -20,7 +20,6 @@ class FooterCredit(QWidget):
         layout.setSpacing(2)
         layout.setAlignment(Qt.AlignRight | Qt.AlignBottom)
 
-        # Path ikon menggunakan resource_path
         icon_path = resource_path("icons/copyright.png")
         icon_pixmap = QPixmap(icon_path)
 
@@ -28,7 +27,7 @@ class FooterCredit(QWidget):
         if not icon_pixmap.isNull():
             icon_label.setPixmap(icon_pixmap.scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
-        text_label = QLabel("PKL-UINMA 2025 GPAIDA")
+        text_label = QLabel("PKL-UINMA 2025 SIGADISIndo")
         text_label.setFont(QFont(font_family, 10))
         text_label.setStyleSheet("color: #212121; padding-left: 2px;")
 
