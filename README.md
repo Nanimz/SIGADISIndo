@@ -73,7 +73,7 @@ SIGADISIndo adalah sistem informasi yang dikembangkan untuk membantu dalam menge
 
      - Pilih file utama: `main.py`
      - Pilih opsi: **"One File"**
-     - Tambahkan folder seperti `assets/`, `icons/`, dan `UI/` pada bagian **"Additional Files"**
+     - Tambahkan folder seperti `assets/` dan `icons/` pada bagian **"Additional Files"**
      - Sesuaikan opsi lainnya sesuai kebutuhan
 
   4. Klik **Convert .py to .exe**
