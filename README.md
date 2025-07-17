@@ -56,7 +56,7 @@ SIGADISIndo adalah sistem informasi yang dikembangkan untuk membantu dalam menge
 
 ## 📌 Catatan Tambahan
 
-- Proyek ini dibuat sebagai bagian dari kegiatan **magang di Kantor Kementerian Agama Kota Malang**, dengan tujuan membantu digitalisasi dan pengelolaan data guru Pendidikan Agama Islam (PAI).
+- Proyek ini dibuat sebagai bagian dari kegiatan **PKL (Praktek Kerja Lapangan) di Kantor Kementerian Agama Kota Malang**, dengan tujuan membantu digitalisasi dan pengelolaan data guru Pendidikan Agama Islam (PAI).
 - Folder `venv/` **tidak disertakan** dalam repositori. Jika ingin menjalankan proyek ini, buat virtual environment secara lokal dan install semua dependensi yang dibutuhkan.
 - File antarmuka pengguna dibuat dengan **Qt Designer**, dan dapat diedit melalui file `.ui` yang berada di dalam folder `UI/`.
 - Jika Anda ingin mengubah proyek ini menjadi aplikasi desktop mandiri (.exe), Anda bisa menggunakan **[auto-py-to-exe](https://github.com/brentvollebregt/auto-py-to-exe)**. Berikut langkah-langkahnya:
