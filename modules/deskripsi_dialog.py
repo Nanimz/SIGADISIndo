@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 
 def show_deskripsi_dialog():
     dialog = QDialog()
-    dialog.setWindowTitle("📘 Panduan Aplikasi Manajemen GPAIDIA")
+    dialog.setWindowTitle("📘 Panduan Aplikasi Manajemen SIGADISIndo")
     dialog.setMinimumSize(700, 550)
 
     layout = QVBoxLayout(dialog)
@@ -15,7 +15,7 @@ def show_deskripsi_dialog():
     content_layout = QVBoxLayout(content_widget)
 
     panduan_teks = """
-    <h2 style='color:#2c3e50;'>Selamat Datang di <span style='color:#1abc9c;'>Aplikasi Manajemen GPAIDIA</span>!</h2>
+    <h2 style='color:#2c3e50;'>Selamat Datang di <span style='color:#1abc9c;'>Aplikasi Manajemen SIGADISIndo</span>!</h2>
     <p style='font-size:12pt;'>
     Aplikasi ini dirancang untuk memudahkan pengelolaan data pegawai melalui berbagai fitur canggih dan ramah pengguna.
     </p>
@@ -23,7 +23,7 @@ def show_deskripsi_dialog():
     <h3 style='color:#2980b9;'>🔧 Fitur Utama:</h3>
     <ul style='font-size:11pt;'>
         <li><b>Pembacaan Data dari Excel:</b><br>
-            Memuat data dari file Excel (.xls, .xlsx, dll.) secara instan.
+            Memuat data dari file Excel (.xlsx) secara instan.
         </li><br>
         <li><b>Penampilan Data:</b><br>
             Menampilkan data dalam bentuk tabel interaktif dengan kolom yang bisa disesuaikan.<br>
