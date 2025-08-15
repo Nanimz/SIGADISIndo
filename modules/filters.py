@@ -44,7 +44,7 @@ class FilterWidget(QWidget):
         grid.setVerticalSpacing(10)
 
         filter_data = [
-            ("Jenjang Sekolah", ["Semua", "SD", "SMP", "SMA", "SMK"]),
+            ("Jenjang Sekolah", ["Semua", "TK", "SD","SLB", "SMP", "SMA", "SMK"]),
             ("Status Pegawai", ["Semua", "PNS", "NON PNS", "PPPK"]),
             ("Golongan", ["Semua", "III/a", "III/b","III/c","III/d","IV/a","IV/b","IV/c","IV/d","IV/e","IX","X", "XI", "xII"]),
             ("Jenis Kelamin", ["Semua", "L", "P"]),
